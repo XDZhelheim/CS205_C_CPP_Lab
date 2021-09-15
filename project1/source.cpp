@@ -26,9 +26,9 @@ bool check_valid(string input_str) {
 void read_input(string &multiplicand, string &multiplier) {
     cin >> multiplicand >> multiplier;
 
-    char nxtchar;
-    while ((nxtchar = getchar()) != LF) {
-        if (nxtchar != SP) {
+    char nextchar;
+    while ((nextchar = getchar()) != LF) {
+        if (nextchar != SP) {
             fflush(stdin);
             cout << "Wrong number of input, please input two integers:" << endl;
             cin >> multiplicand >> multiplier;
