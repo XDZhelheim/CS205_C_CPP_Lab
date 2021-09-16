@@ -89,6 +89,9 @@ string multiply(string &multiplicand, string &multiplier) {
             result.push_back(temp[i] + '0');
     }
 
+    if (!flag)
+        result="0";
+
     return result;
 }
 
