@@ -41,7 +41,7 @@ void read_input(string &multiplicand, string &multiplier);
 
   * `argc=3`
 
-    Read multiplicand and multiplier from `argv[1], argv[2]`
+    Read multiplicand and multiplier from `argv[1], argv[2]`.
 
   * `argc=1`
 
@@ -110,24 +110,124 @@ void read_input(string &multiplicand, string &multiplier);
 
   Used when the program need to get input from `stdin`.
 
-  **Implementation:**
+  Multiple whitespaces before, between or after the two numbers are allowed. (eg.    2     3          ) 
 
+  **Implementation:**
+  
   ```c++
+  void clear_stdin() {
+      while (getchar() != '\n');
+  }
+  
   void read_input(string &multiplicand, string &multiplier) {
       cin >> multiplicand >> multiplier;
   
       char nextchar;
       while ((nextchar = getchar()) != LF) {
           if (nextchar != SP) {
-              fflush(stdin);
+              clear_stdin();
               cout << "Wrong number of input, please input two integers:" << endl;
               cin >> multiplicand >> multiplier;
           }
       }
   }
   ```
-
-  **Test cases:**
-
   
+  **Test cases:**
+  
+  ![](./images/2-1-3.png)
+
+### 2.2 Big Integer Multiplication
+
+Macros and helper functions used in this section:
+
+```c++
+#define NUL 0     // ASCII code for null
+#define MINUS 45  // ASCII code for '-'
+
+int get_sign(string &number);
+```
+
+**Design:**
+
+Considering the overflow problem of using integer data types like `long long`, it is necessary to simulate the manual calculation steps, which means multiplying digit-by-digit.
+
+Following are the steps:
+
+1. Determine the sign of the result.
+2. Define an integer array to store intermediate result.
+3. Do multiplication digit by digit, and store the product to the corresponding position of the array.
+4. Calculate carry and add it to the next digit.
+5. Export the data in the array to a string, and add sign to it.
+
+And there are also some points need to be noticed:
+
+* The index of the highest digit of a number is 0 when stored in a string, which is opposite to common sense.
+* Handle the consecutive zeros in the array when exporting it to a result string.
+* When any number multiplied by zero.
+
+**Implementation:**
+
+```c++
+int get_sign(string &number) {
+    int sign;
+    if (number[0] == '-') {
+        sign = -1;
+        number = &number[1];
+    } else {
+        sign = 1;
+        if (number[0] == '+')
+            number = &number[1];
+    }
+    return sign;
+}
+
+string multiply(string &multiplicand, string &multiplier) {
+    int sign1 = get_sign(multiplicand);
+    int sign2 = get_sign(multiplier);
+    char sign = sign1 * sign2 > 0 ? NUL : MINUS; // sign of result
+
+    int sum_len = multiplicand.length() + multiplier.length();
+    int temp[sum_len];
+    memset(temp, 0, sizeof(temp));
+
+    for (int i = multiplier.length() - 1; i >= 0; i--)
+        for (int j = multiplicand.length() - 1; j >= 0; j--) {
+            if (DEBUG)
+                cout << "i=" << i << ", j=" << j << ": " << multiplier[i] - '0'
+                     << "*" << multiplicand[j] - '0' << endl;
+            temp[sum_len - 2 - (i + j)] += (multiplicand[j] - '0') * (multiplier[i] - '0');
+        }
+
+    for (int i = 0; i < sum_len; i++) {
+        temp[i + 1] += temp[i] / 10;
+        temp[i] %= 10;
+    }
+
+    string result;
+    result.push_back(sign);
+    bool flag = 0;
+    for (int i = sum_len - 1; i >= 0; i--) {
+        if (temp[i] != 0) 
+            flag = 1;
+        if (flag) 
+            result.push_back(temp[i] + '0');
+    }
+
+    if (!flag)
+        result="0";
+
+    return result;
+}
+```
+
+**Test cases:**
+
+![](./images/2-2-1.png)
+
+---
+
+## 3 Conclusion
+
+In this project, I design and implemented a simple muliplication calculator. And I learned how to handle standard input in `C++` and some basic operations of string and array. The main difficuty I met is that I am not familiar with `C++` syntax. There are so many differences between it and `Java, Python`. Therefore, I still have a lot of things to learn in the future classes.
 
