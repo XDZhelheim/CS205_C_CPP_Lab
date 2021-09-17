@@ -4,9 +4,9 @@
 
 ---
 
-## 1 Introduction
+### 1 Introduction
 
-### 1.1 Project Description
+#### 1.1 Project Description
 
 This project is to implement a calculator that can multiply any two integers.
 
@@ -15,7 +15,7 @@ Mainly, it has two functions:
 1. Input validation
 2. Big integer multiplication
 
-### 1.2 Development Environment
+#### 1.2 Development Environment
 
 * `Ubuntu 20.04.2 LTS x86_64` with `Linux 5.8.0-50-generic`
 * `g++ (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0`
@@ -23,9 +23,9 @@ Mainly, it has two functions:
 
 ---
 
-## 2 Design and Implementation
+### 2 Design and Implementation
 
-### 2.1 Input Validation
+#### 2.1 Input Validation
 
 Macros and helper functions used in this section:
 
@@ -81,6 +81,7 @@ void read_input(string &multiplicand, string &multiplier);
 
   ```c++
   #include <regex>
+  #include <string>
   
   regex number_regexp("(\\+?|-)\\d+");
   
@@ -137,7 +138,7 @@ void read_input(string &multiplicand, string &multiplier);
   
   ![](./images/2-1-3.png)
 
-### 2.2 Big Integer Multiplication
+#### 2.2 Big Integer Multiplication
 
 Macros and helper functions used in this section:
 
@@ -227,7 +228,7 @@ string multiply(string &multiplicand, string &multiplier) {
 
 ---
 
-## 3 Conclusion
+### 3 Conclusion
 
 In this project, I design and implemented a simple muliplication calculator. And I learned how to handle standard input in `C++` and some basic operations of string and array. The main difficuty I met is that I am not familiar with `C++` syntax. There are so many differences between it and `Java, Python`. Therefore, I still have a lot of things to learn in the future classes.
 
