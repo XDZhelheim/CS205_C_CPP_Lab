@@ -27,13 +27,14 @@ void clear_stdin() {
     while (getchar() != '\n');
 }
 
+// Read input integers from standard input
+// If user inputs more than two integers, ask him to re-input
 void read_input(string &multiplicand, string &multiplier) {
     cin >> multiplicand >> multiplier;
 
     char nextchar;
     while ((nextchar = getchar()) != LF) {
         if (nextchar != SP) {
-            // cin.sync();
             clear_stdin();
             cout << "Wrong number of input, please input two integers:" << endl;
             cin >> multiplicand >> multiplier;
@@ -41,6 +42,8 @@ void read_input(string &multiplicand, string &multiplier) {
     }
 }
 
+// Get the sign of an input integer
+// If it has a leading + or -, delete it
 int get_sign(string &number) {
     int sign;
     if (number[0] == '-') {
@@ -54,10 +57,11 @@ int get_sign(string &number) {
     return sign;
 }
 
+// Multiply two integers (will not overflow)
 string multiply(string &multiplicand, string &multiplier) {
     int sign1 = get_sign(multiplicand);
     int sign2 = get_sign(multiplier);
-    char sign = sign1 * sign2 > 0 ? NUL : MINUS;
+    char sign = sign1 * sign2 > 0 ? NUL : MINUS; // sign of result
 
     int sum_len = multiplicand.length() + multiplier.length();
     int temp[sum_len];
@@ -115,6 +119,7 @@ int main(int argc, char const *argv[]) {
         read_input(multiplicand, multiplier);
     }
 
+    // check if input is integer and ask for re-input if not
     while (!(check_valid(multiplicand) && check_valid(multiplier))) {
         cout << "Invalid input, please input two integers:" << endl;
         read_input(multiplicand, multiplier);
