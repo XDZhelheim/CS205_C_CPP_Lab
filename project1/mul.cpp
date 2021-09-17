@@ -29,7 +29,7 @@ void read_input(string &multiplicand, string &multiplier) {
     char nextchar;
     while ((nextchar = getchar()) != LF) {
         if (nextchar != SP) {
-            fflush(stdin);
+            cin.sync();
             cout << "Wrong number of input, please input two integers:" << endl;
             cin >> multiplicand >> multiplier;
         }
