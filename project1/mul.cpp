@@ -23,13 +23,18 @@ bool check_valid(string input_str) {
     return regex_match(input_str, number_regexp);
 }
 
+void clear_stdin() {
+    while (getchar() != '\n');
+}
+
 void read_input(string &multiplicand, string &multiplier) {
     cin >> multiplicand >> multiplier;
 
     char nextchar;
     while ((nextchar = getchar()) != LF) {
         if (nextchar != SP) {
-            cin.sync();
+            // cin.sync();
+            clear_stdin();
             cout << "Wrong number of input, please input two integers:" << endl;
             cin >> multiplicand >> multiplier;
         }
