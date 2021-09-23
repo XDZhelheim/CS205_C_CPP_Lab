@@ -32,3 +32,5 @@
 *.app
 
 .vscode/
+temp/
+out*.txt
