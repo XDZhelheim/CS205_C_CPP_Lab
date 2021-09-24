@@ -5,7 +5,7 @@
 
 #define DEBUG 0
 
-#define USE_DOUBLE 1
+#define USE_DOUBLE 0
 
 #if USE_DOUBLE
     #define REAL_NUMBER double
@@ -18,8 +18,7 @@ using namespace std;
 typedef vector<vector<REAL_NUMBER>> matrix;
 
 matrix read_matrix(const char *file_name) {
-    ifstream in(file_name);
-    if (!in.is_open()) {
+    if (!freopen(file_name, "r", stdin)) {
         cout << "Error opening file." << endl;
         exit(EXIT_FAILURE);
     }
@@ -29,30 +28,17 @@ matrix read_matrix(const char *file_name) {
     REAL_NUMBER temp;
     int i = 0, j = 0;
     m.push_back(vector<REAL_NUMBER>());
-    while (in >> temp) {
+    while (cin >> temp) {
         m[i].push_back(temp);
-        if (in.get() == '\n' && in.peek() != EOF) {
+        if (cin.get() == '\n' && cin.peek() != EOF) {
             m.push_back(vector<REAL_NUMBER>());
             i++;
             j = 0;
         }
     }
 
-    in.close();
+    cin.clear(); // reset the status bits of cin
     return m;
-}
-
-void print_matrix(matrix m, const char *file_name) {
-    ofstream out(file_name);
-
-    for (int i = 0; i < m.size(); i++) {
-        for (int j = 0; j < m[0].size(); j++) {
-            out << m[i][j] << " ";
-        }
-        out << endl;
-    }
-
-    out.close();
 }
 
 void print_matrix(matrix m) {
@@ -62,6 +48,12 @@ void print_matrix(matrix m) {
         }
         cout << endl;
     }
+}
+
+void print_matrix(matrix m, const char *file_name) {
+    freopen(file_name, "w", stdout);
+
+    print_matrix(m);
 }
 
 matrix multiply_matrix(matrix m1, matrix m2) {
@@ -87,6 +79,10 @@ matrix multiply_matrix(matrix m1, matrix m2) {
 }
 
 int main(int argc, char const *argv[]) {
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+
     if (argc != 4) {
         cout << "Wrong number of arguments.";
         exit(EXIT_FAILURE);
