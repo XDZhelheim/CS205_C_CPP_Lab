@@ -32,6 +32,6 @@
 *.app
 
 .vscode/
-temp/
+temp*
 out*.txt
 test*.txt

@@ -161,12 +161,6 @@ matrix merge_matrix(matrix C11, matrix C12, matrix C21, matrix C22) {
     return C;
 }
 
-void free_matrix(matrix &m) {
-    // m.clear();
-    // m.shrink_to_fit();
-    matrix().swap(m);
-}
-
 matrix strassen(matrix A, matrix B) {
     if (A.size() != B.size() || A[0].size() != B[0].size()) {
         cout << "Strassen multiplication error: matrix dimension cannot match."
@@ -225,36 +219,6 @@ matrix strassen(matrix A, matrix B) {
     C22 = sub_matrix(C22, P7);
 
     matrix C = merge_matrix(C11, C12, C21, C22);
-
-    free_matrix(A11);
-    free_matrix(A12);
-    free_matrix(A21);
-    free_matrix(A22);
-    free_matrix(B11);
-    free_matrix(B12);
-    free_matrix(B21);
-    free_matrix(B22);
-    free_matrix(S1);
-    free_matrix(S2);
-    free_matrix(S3);
-    free_matrix(S4);
-    free_matrix(S5);
-    free_matrix(S6);
-    free_matrix(S7);
-    free_matrix(S8);
-    free_matrix(S9);
-    free_matrix(S10);
-    free_matrix(P1);
-    free_matrix(P2);
-    free_matrix(P3);
-    free_matrix(P4);
-    free_matrix(P5);
-    free_matrix(P6);
-    free_matrix(P7);
-    free_matrix(C11);
-    free_matrix(C12);
-    free_matrix(C21);
-    free_matrix(C22);
 
     return C;
 }
