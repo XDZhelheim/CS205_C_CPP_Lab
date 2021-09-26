@@ -316,32 +316,7 @@ matrix merge_matrix(matrix C11, matrix C12, matrix C21, matrix C22) {
 }
 ```
 
-##### 2.4.5 Helper Function: Free Matrix's Memory
-
-In **Strassen's algorithm**, there are lots of intermediate matrices such as $S_1, S_2, \dots, S_{10}$  and $P_1, P_2, \dots, P_7$.
-
-When $C$ is computed, they are of no use. So we should do garbage collection.
-
-By looking up online, there are two ways to free a matrix's memory:
-
-```c++
-void free_matrix(matrix &m) {
-    matrix().swap(m);
-}
-```
-
-Or
-
-```c++
-void free_matrix(matrix &m) {
-    m.clear();
-    m.shrink_to_fit();
-}
-```
-
-Both are correct.
-
-##### 2.4.6 Implementation
+##### 2.4.5 Implementation
 
 1. Check if the size satisfies the requirement of Strassen's algorithm
 
@@ -369,7 +344,7 @@ matrix strassen(matrix A, matrix B) {
 
     int N = A.size();
 
-    if (N & (N - 1) != 0) {
+    if ((N & (N - 1)) != 0) {
         cout << "Strassen multiplication error: matrix dimension is not 2^n."
              << endl;
         exit(EXIT_FAILURE);
@@ -420,6 +395,49 @@ matrix strassen(matrix A, matrix B) {
     matrix C = merge_matrix(C11, C12, C21, C22);
 
     return C;
+}
+```
+
+### 2.5 Main Function
+
+In the main function, I used `clock()` function to record the time used to read files and perform Strassen's algorithm.
+
+```c++
+int main(int argc, char const *argv[]) {
+    if (argc != 4) {
+        cout << "Wrong number of arguments.";
+        exit(EXIT_FAILURE);
+    }
+    double start, end;
+
+    start = clock();
+
+    matrix m1 = read_matrix(argv[1]);
+    matrix m2 = read_matrix(argv[2]);
+
+    end = clock();
+    cout << "Read file time: " << (end - start) / (double)1000 << "s" << endl;
+
+    start = clock();
+
+    matrix res;
+    if ((m1.size() & (m1.size()-1)) == 0 && m1.size() == m1[0].size() &&
+        (m2.size() & (m2.size()-1)) == 0 && m2.size() == m2[0].size() &&
+        m1.size() == m2.size()
+    ) {
+        cout << "Using Strassen algorithm." << endl;
+        res = strassen(m1, m2);
+    } else {
+        cout << "Using for-loop multiplication." << endl;
+        res = multiply_matrix(m1, m2);
+    }
+
+    end = clock();
+    cout << "Multiplication time: " << (end - start) / (double)1000 << "s" << endl;
+
+    print_matrix(res, argv[3]);
+
+    return 0;
 }
 ```
 

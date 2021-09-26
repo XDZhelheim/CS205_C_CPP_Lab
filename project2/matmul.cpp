@@ -170,7 +170,7 @@ matrix strassen(matrix A, matrix B) {
 
     int N = A.size();
 
-    if (N & (N - 1) != 0) {
+    if ((N & (N - 1)) != 0) {
         cout << "Strassen multiplication error: matrix dimension is not 2^n."
              << endl;
         exit(EXIT_FAILURE);
@@ -246,7 +246,17 @@ int main(int argc, char const *argv[]) {
 
     start = clock();
 
-    matrix res = strassen(m1, m2);
+    matrix res;
+    if ((m1.size() & (m1.size()-1)) == 0 && m1.size() == m1[0].size() &&
+        (m2.size() & (m2.size()-1)) == 0 && m2.size() == m2[0].size() &&
+        m1.size() == m2.size()
+    ) {
+        cout << "Using Strassen algorithm." << endl;
+        res = strassen(m1, m2);
+    } else {
+        cout << "Using for-loop multiplication." << endl;
+        res = multiply_matrix(m1, m2);
+    }
 
     end = clock();
     cout << "Multiplication time: " << (end - start) / (double)1000 << "s" << endl;
@@ -257,45 +267,28 @@ int main(int argc, char const *argv[]) {
 }
 
 void debug_test() {
-    // matrix m1 =
-    // read_matrix("H:\\Codes\\C-CppWorkspace\\CS205_C_CPP_Lab\\project2\\mat-A-32.txt");
-    // matrix m2 =
-    // read_matrix("H:\\Codes\\C-CppWorkspace\\CS205_C_CPP_Lab\\project2\\mat-B-32.txt");
+    matrix m1 =
+    read_matrix("H:\\Codes\\C-CppWorkspace\\CS205_C_CPP_Lab\\project2\\data\\mat-A-32.txt");
+    matrix m2 =
+    read_matrix("H:\\Codes\\C-CppWorkspace\\CS205_C_CPP_Lab\\project2\\data\\mat-B-32.txt");
 
-    // cout << "capacity: "<<m1.capacity() << endl;
-    // cout << "size: " << m1.size() << endl;
-    // free_matrix(m1);
-    // cout << "capacity: "<<m1.capacity() << endl;
-    // cout << "size: " << m1.size() << endl;
+    cout<<((m1.size() & (m1.size()-1)) == 0)<<endl;
+    cout<<((m2.size() & (m2.size()-1)) == 0)<<endl;
+    cout<<(m1.size() == m1[0].size())<<endl;
+    cout<<(m2.size() == m2[0].size())<<endl;
+    cout<<(m1.size() == m2.size())<<endl;
 
-    matrix A = read_matrix(
-        "H:\\Codes\\C-CppWorkspace\\CS205_C_CPP_Lab\\project2\\test_matrix."
-        "txt");
-    // int N=A.size();
-    // cout<<N<<endl;
-    // matrix A11=slice_matrix(A, 0, N/2, 0, N/2);
-    // matrix A12=slice_matrix(A, 0, N/2, N/2, N);
-    // matrix A21=slice_matrix(A, N/2, N, 0, N/2);
-    // matrix A22=slice_matrix(A, N/2, N, N/2, N);
-    // print_matrix(A11);
-    // cout<<endl;
-    // print_matrix(A12);
-    // cout<<endl;
-    // print_matrix(A21);
-    // cout<<endl;
-    // print_matrix(A22);
-    // cout<<endl;
-
-    // matrix C=merge_matrix(A11, A12, A21, A22);
-    // free_matrix(A11);
-    // free_matrix(A12);
-    // free_matrix(A21);
-    // free_matrix(A22);
-    // print_matrix(C);
-
-    matrix B = read_matrix("H:\\Codes\\C-CppWorkspace\\CS205_C_CPP_Lab\\project2\\test_matrix.txt");
-    matrix C = strassen(A, B);
-    print_matrix(C);
+    matrix res;
+    if ((m1.size() & (m1.size()-1)) == 0 && m1.size() == m1[0].size() &&
+        (m2.size() & (m2.size()-1)) == 0 && m2.size() == m2[0].size() &&
+        m1.size() == m2.size()
+    ) {
+        cout << "Using Strassen algorithm." << endl;
+        res = strassen(m1, m2);
+    } else {
+        cout << "Using for-loop multiplication." << endl;
+        res = multiply_matrix(m1, m2);
+    }
 
     exit(EXIT_SUCCESS);
 }
