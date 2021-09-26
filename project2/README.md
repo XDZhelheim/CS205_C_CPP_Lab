@@ -4,9 +4,11 @@
 
 ---
 
-### 1 Introduction
+[TOC]
 
-#### 1.1 Project Description
+## 1 Introduction
+
+### 1.1 Project Description
 
 This project aims to implement a program to multiply two matrices in two files.
 
@@ -22,16 +24,14 @@ The requirements are:
 
 In my code, I implemented **Strassen's algorithm** with `vector` in `C++`.
 
-#### 1.2 Development Environment
+### 1.2 Development Environment
 
 * `Windows 10 Home China x86_64`
 * Kernel version `10.0.19042`
 * `g++.exe (tdm64-1) 10.3.0`
 * C++ standard: `c++11`
 
----
-
-### 2 Design and Implementation
+## 2 Design and Implementation
 
 Header files and macros used in this section:
 
@@ -56,7 +56,7 @@ Header files and macros used in this section:
 typedef vector<vector<REAL_NUMBER>> matrix;
 ```
 
-#### 2.1 Matrix Construction
+### 2.1 Matrix Construction
 
 Since there is no size told in the files, it is necessary to compute the size of the input matrix.
 
@@ -93,7 +93,7 @@ matrix read_matrix(const char *file_name) {
 }
 ```
 
-#### 2.2 Write Matrix to File
+### 2.2 Write Matrix to File
 
 By default, the significant digits of a `float` or `double` number is 6. So it is essential to set the precison of the out stream. For example, 15 for `double`.
 
@@ -117,7 +117,7 @@ void print_matrix(matrix m, const char *file_name) {
 
 ---
 
-#### 2.3 For-loop Matrix Multiplication
+### 2.3 For-loop Matrix Multiplication
 
 The naive algorithm for matrix multiplication is to use a triple nested for-loop.
 $$
@@ -157,15 +157,15 @@ By swapping $k$ and $j$, the program can read memory consecutively, which can sa
 
 ---
 
-#### 2.4 Strassen's Algorithm
+### 2.4 Strassen's Algorithm
 
-Hence the dimension of the given matrices are a power of two, we can use **Strassen's algorithm** to increase the speed.
+Since the dimension of the given matrices are a power of two, we can use **Strassen's algorithm** to increase the speed.
 
 Volker Strassen published his algorithm in 1969. It was the first algorithm to prove that the basic $O(n^3)$ runtime was not optimal.
 
 Suppose $C=AB$. The basic idea behind Strassen's algorithm is to split $A$ and $B$ into 8 submatrices and then recursively compute the submatrices of $C$.
 
-##### 2.4.1 Methodology
+#### 2.4.1 Methodology
 
 Suppose $A, B$ are square and the dimension of $A, B$ are a power of two and $\dim(A)=\dim(B)$.
 
@@ -214,7 +214,7 @@ C_{22}&=P_5+P_1-P_3-P_7
 \end{aligned}
 $$
 
-##### 2.4.2 Time Complexity
+#### 2.4.2 Time Complexity
 
 $$
 T(n)=\Theta(n^{\log_27})\approx\Theta(n^{2.807})
@@ -224,7 +224,7 @@ Approximately, when $n=296$, **Strassen's algorithm** will give 3x speed acceler
 
 ![](./images/time_comp.png)
 
-##### 2.4.3 Helper Functions: Matrix Addition and Subtraction
+#### 2.4.3 Helper Functions: Matrix Addition and Subtraction
 
 Because we will use matrix addition and subtraction in **Strassen's algorithm**.
 $$
@@ -270,7 +270,7 @@ matrix sub_matrix(matrix m1, matrix m2) {
 }
 ```
 
-##### 2.4.4 Helper Functions: Matrix Decomposition and Combination
+#### 2.4.4 Helper Functions: Matrix Decomposition and Combination
 
 In the first step, we should split the matrix into 4 submatrices.
 
@@ -316,7 +316,7 @@ matrix merge_matrix(matrix C11, matrix C12, matrix C21, matrix C22) {
 }
 ```
 
-##### 2.4.5 Implementation
+#### 2.4.5 Implementation
 
 1. Check if the size satisfies the requirement of Strassen's algorithm
 
@@ -326,7 +326,7 @@ matrix merge_matrix(matrix C11, matrix C12, matrix C21, matrix C22) {
 
    If `N <= STRASSEN_LOWER_BOUND`, use regular matrix multiplication.
 
-   Because when $N$ is small, for-loop is much faster. Details given in part 3.
+   Because when $N$ is small, for-loop is much faster. Details will be given in section [3.6](#3.6).
 
 3. Use the above helper functions to calculate intermediate matrices.
 
@@ -400,7 +400,9 @@ matrix strassen(matrix A, matrix B) {
 
 ### 2.5 Main Function
 
-In the main function, I used `clock()` function to record the time used to read files and perform Strassen's algorithm.
+In the main function, I used `clock()` function to record the time used to read files and perform matrix multiplication.
+
+What's more, the program can automatically select multiplication algorithm. If the input matrices do not satisfy the requirement of Strassen's algorithm, use for-loop.
 
 ```c++
 int main(int argc, char const *argv[]) {
@@ -439,5 +441,273 @@ int main(int argc, char const *argv[]) {
 
     return 0;
 }
+```
+
+## 3 Empirical Verification
+
+This part is written in Python. See [Appendix. 1](#ap1) for code.
+
+### 3.1 Test Platform
+
+* `Windows 10 Home China x86_64`
+* Kernel version `10.0.19042`
+* `Python 3.8.5 (tags/v3.8.5:580fbb0, Jul 20 2020, 15:57:54) [MSC v.1924 64 bit (AMD64)]`
+* `numpy 1.18.5`
+* `matplotlib 3.3.3`
+
+### 3.2 Evaluation Criterion
+
+The test aims to evaluate speed and accuracy of the program.
+
+For speed, record the time used for matrix multiplication, which is already introduced in section 2.5.
+
+For accuracy, use `numpy.matmul()` as ground truth, then compute root mean squared error.
+$$
+RMSE=\sqrt{\frac 1n\sum_{i=1}^n (\hat y_i-y_i)^2}
+$$
+
+```python
+def rmse(predictions, targets):
+    return np.sqrt(np.mean((predictions - targets)**2))
+```
+
+The lower, the more accurate.
+
+### 3.3 Dataset & Test Cases
+
+The given matrices are 32, 256 and 2048 dimension.
+
+For test, I generated 64, 128, 512 and 1024 dimension matrices based on the given 2048 dimension matrices.
+
+```pyth
+import numpy as np
+
+if __name__ == "__main__":
+    A=np.loadtxt("./mat-A-2048.txt")
+    B=np.loadtxt("./mat-B-2048.txt")
+
+    dims=[64, 128, 512, 1024]
+
+    for dim in dims:
+        np.savetxt(f"./mat-A-{dim}.txt", A[:dim, :dim], fmt="%.1f")
+        np.savetxt(f"./mat-B-{dim}.txt", A[:dim, :dim], fmt="%.1f")
+```
+
+And the programs for test:
+
+|            Program            | Data Type |       Algorithm       |
+| :---------------------------: | :-------: | :-------------------: |
+|      `matmul_double.cpp`      | `double`  | Strassen and for-loop |
+|      `matmul_float.cpp`       |  `float`  | Strassen and for-loop |
+|     `matmul_strassen.cpp`     | `double`  |       Strassen        |
+|     `matmul_forloop.cpp`      | `double`  |       For-loop        |
+| `matmul_strassen_forloop.cpp` | `double`  | Strassen and for-loop |
+
+For "Strassen and for-loop", see details in section [3.6](#3.6).
+
+Raw data is in [Appendix. 2](#ap2).
+
+### 3.4 double vs. float
+
+**Speed:**
+
+![](./images/df_time_cost.png)
+
+The curves are almost the same. This is because `float` is converted to `double` when performing calculations.
+
+**Accuracy:**
+
+![](./images/df_rmse.png)
+
+`double` is much more accurate. This is because `double` has more fraction bits (52), about 15 decimal digits. And this is why `#define PRECISION 15`.
+
+### 3.5 Strassen vs. For-loop
+
+**Speed:**
+
+![](./images/sf_time_cost.png)
+
+In contrast to my expectation, Strassen's algorithm is much slower than for-loop.
+
+I think this is because I used too many `vector` operations in the algorithm, such as `slice_matirx()` and ` merge_matrix()`, which are very time-costing. And I start to regret about using `vector` to store matrices.
+
+**Accuracy:**
+
+![](./images/sf_rmse.png)
+
+For-loop is more accurate.
+
+I think the reason is Strassen's algorithm contains plenty of floating point addition and subtraction. When performing these actions, the floating point numbers will lose precision. On the contrary, the operation of for-loop multiplication is very simple.
+
+### <span id="3.6">3.6 Combine Strassen's Algorithm and For-loop</span>
+
+Since for-loop takes advantage in dealing with small matrices, we can change the termination condition of Strassen's algorithm. When the dimension is less than or equal to some number, switch to for-loop multiplication.
+
+```c++
+if (N <= STRASSEN_LOWER_BOUND) {
+    return multiply_matrix(A, B);
+}
+```
+
+Here I found `STRASSEN_LOWER_BOUND = 128` is a good value.
+
+**Speed:**
+
+![](./images/s+f_time_cost.png)
+
+When dim=2048, the combined algorithm is about 30s faster than for-loop. So it is much faster.
+
+**Accuracy:**
+
+![](./images/s+f_rmse.png)
+
+The accuracy of the combined algorithm is much higher than Strassen's algorithm.
+
+## 4 Conclusion
+
+In this project, I implemented Strassen's algorithm and used Python to design some test cases for different conditions. I learnt many `vector` operations and file manipulation methods. What's more, I used `matplotlib` to visualize the test results, which I never tried before.
+
+**Future Impovement Directions:**
+
+Still, the algorithm only support matrices whose dimension is a power of two. And there is "Common Strassen's Algorithm" that can support any matrices.
+
+`vector` operations are very slow, maybe I should try to use array.
+
+File I/O of the program is slow, need to find some faster ways.
+
+## <span id="ap1">Appendix. 1: test.py</span>
+
+```python
+import numpy as np
+import os
+import matplotlib.pyplot as plt
+import json
+
+
+def rmse(predictions, targets):
+    return np.sqrt(np.mean((predictions - targets)**2))
+
+
+def plot_compare(x1, y1, x2, y2, label1, label2, title, xlabel_name,
+                 ylabel_name, fig_path, ylimit: tuple=None):
+    if ylimit:
+        plt.ylim(ylimit)
+    plt.plot(x1, y1, "o-", label=label1)
+    plt.plot(x2, y2, "o-", label=label2)
+    plt.title(title)
+    plt.xlabel(xlabel_name)
+    plt.ylabel(ylabel_name)
+    plt.legend()
+    plt.savefig(fig_path)
+    plt.clf()
+
+
+if __name__ == "__main__":
+    dims = ["32", "64", "128", "256", "512", "1024", "2048"]
+    cases = ["double", "float", "strassen", "forloop", "strassen_forloop"]
+    time_cost_dict = {}
+    rmse_dict = {}
+
+    for case in cases:
+        os.system("g++ matmul_{0}.cpp -o matmul_{0}".format(case))
+        time_cost_dict[case] = []
+        rmse_dict[case] = []
+
+        for dim in dims:
+            if case=="strassen" and dim=="2048":
+                time_cost_dict[case].append(4800) # 如果真要跑大概 1 小时 20 分钟, 不方便画图
+                rmse_dict[case].append(1.3950859156363537e-07)
+                continue
+
+            A = np.loadtxt(f"../data/mat-A-{dim}.txt")
+            B = np.loadtxt(f"../data/mat-B-{dim}.txt")
+            C = np.matmul(A, B)
+
+            cout = os.popen(
+                f"matmul_{case} ../data/mat-A-{dim}.txt ../data/mat-B-{dim}.txt ./out-{case}-{dim}.txt"
+            ).read()
+            time_cost = float(cout.split()[-1][:-1])
+            time_cost_dict[case].append(time_cost)
+
+            out = np.loadtxt(f"./out-{case}-{dim}.txt")
+            rmse_dict[case].append(rmse(out, C))
+
+            print(f"Finished {case}-{dim}")
+
+    with open("./time_cost_dict.json", "w") as f:
+        json.dump(time_cost_dict, f)
+    with open("./rmse_dict.json", "w") as f:
+        json.dump(rmse_dict, f)
+
+    plot_compare(dims, time_cost_dict["double"], dims, time_cost_dict["float"],
+                 "double", "float", 
+                 "double vs float: time cost", 
+                 "Dimension",
+                 "Time/s", 
+                 "../images/df_time_cost.png")
+    plot_compare(dims, rmse_dict["double"], dims, rmse_dict["float"], 
+                 "double", "float", 
+                 "double vs float: RMSE", 
+                 "Dimension", 
+                 "RMSE",
+                 "../images/df_rmse.png")
+
+    plot_compare(dims, time_cost_dict["strassen"], dims, time_cost_dict["forloop"], 
+                 "strassen", "for-loop",
+                 "Strassen vs for-loop: time cost", 
+                 "Dimension", 
+                 "Time/s",
+                 "../images/sf_time_cost.png",
+                 ylimit=(-25, 550))
+    plot_compare(dims, rmse_dict["strassen"], dims, rmse_dict["forloop"],
+                 "strassen", "for-loop", 
+                 "Strassen vs for-loop: RMSE",
+                 "Dimension", 
+                 "RMSE", 
+                 "../images/sf_rmse.png")
+
+    plt.plot(dims, time_cost_dict["strassen"], "o-", label="strassen")
+    plt.plot(dims, time_cost_dict["forloop"], "o-", label="for-loop")
+    plt.plot(dims, time_cost_dict["strassen_forloop"], "o-", label="strassen+for-loop")
+    plt.title("Strassen + for-loop: time cost")
+    plt.xlabel("Dimension")
+    plt.ylabel("Time/s")
+    plt.legend()
+    plt.savefig("../images/s+f_time_cost.png")
+    plt.clf()
+
+    plt.plot(dims, rmse_dict["strassen"], "o-", label="strassen")
+    plt.plot(dims, rmse_dict["forloop"], "o-", label="for-loop")
+    plt.plot(dims, rmse_dict["strassen_forloop"], "o-", label="strassen+for-loop")
+    plt.title("Strassen + for-loop: RMSE")
+    plt.xlabel("Dimension")
+    plt.ylabel("RMSE")
+    plt.legend()
+    plt.savefig("../images/s+f_rmse.png")
+    plt.clf()
+
+    print("Finished.")
+```
+
+## <span id="ap2">Appendix. 2: Raw Data of Test Results</span>
+
+Time cost:
+
+```json
+{"double": [0.0, 0.002, 0.028, 0.191, 1.152, 8.293, 58.321], 
+ "float": [0.0, 0.003, 0.023, 0.163, 1.134, 7.979, 58.091], 
+ "strassen": [0.029, 0.208, 1.525, 10.475, 73.796, 521.855, 4800], 
+ "forloop": [0.0, 0.003, 0.021, 0.176, 1.473, 11.358, 88.87], 
+ "strassen_forloop": [0.0, 0.003, 0.022, 0.166, 1.164, 8.257, 56.155]}
+```
+
+RMSE:
+
+```json
+{"double": [1.3259999206478218e-11, 3.5073080395695516e-11, 1.0334527505674842e-10, 4.161035794077453e-10, 6.654338356356882e-10, 4.555616609288948e-09, 1.5208992007988598e-08], 
+ "float": [0.07317105921189468, 0.28779006257469497, 0.29598391143477026, 0.34850993107530587, 2.9616588755646793, 3.737307585812131, 8.762262507045184], 
+ "strassen": [8.16027617559909e-11, 3.1376644521815304e-10, 9.522083771739254e-10, 3.652269050630416e-09, 1.1517937120122013e-08, 4.164125460986317e-08, 1.3950859156363537e-07], 
+ "forloop": [1.3259999206478218e-11, 3.5073080395695516e-11, 1.0334527505674842e-10, 3.115756985935899e-10, 2.324315094318261e-10, 1.7562295002750738e-09, 7.108342992317124e-09], 
+ "strassen_forloop": [1.3259999206478218e-11, 3.5073080395695516e-11, 1.0334527505674842e-10, 4.161035794077453e-10, 6.654338356356882e-10, 4.555616609288948e-09, 1.5208992007988598e-08]}
 ```
 

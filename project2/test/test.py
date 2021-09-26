@@ -1,4 +1,3 @@
-from typing import Tuple
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -10,7 +9,7 @@ def rmse(predictions, targets):
 
 
 def plot_compare(x1, y1, x2, y2, label1, label2, title, xlabel_name,
-                 ylabel_name, fig_path, ylimit: Tuple=None):
+                 ylabel_name, fig_path, ylimit: tuple=None):
     if ylimit:
         plt.ylim(ylimit)
     plt.plot(x1, y1, "o-", label=label1)
