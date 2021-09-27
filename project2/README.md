@@ -151,7 +151,7 @@ matrix multiply_matrix(matrix m1, matrix m2) {
 }
 ```
 
-Here I swapped the order of for-$k$ and for-$j$ in order to accelerate the speed. 
+Here I swapped the order of for-$k$ and for-$j$ in order to accelerate the speed.
 
 By swapping $k$ and $j$, the program can read memory consecutively, which can save memory access time.
 

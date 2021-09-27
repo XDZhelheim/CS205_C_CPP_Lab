@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define USE_DOUBLE 1
 
