@@ -567,7 +567,7 @@ The accuracy of the combined algorithm is much higher than Strassen's algorithm.
 
 In this project, I implemented Strassen's algorithm and used Python to design some test cases for different conditions. I learnt many `vector` operations and file manipulation methods. What's more, I used `matplotlib` to visualize the test results, which I never tried before.
 
-**Future Impovement Directions:**
+**Future Improvement Directions:**
 
 Still, the algorithm only support matrices whose dimension is a power of two. And there is "Common Strassen's Algorithm" that can support any matrices.
 

@@ -147,7 +147,7 @@ void copy_matrix(matrix* dst, matrix* src) {
     }
 
     for (int i = 0; i < src->nrows * src->ncols; i++) {
-        dst->data[i] = src->data[i] - src->data[i];
+        dst->data[i] = src->data[i];
     }
 }
 

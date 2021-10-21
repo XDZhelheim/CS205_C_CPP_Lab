@@ -8,8 +8,17 @@ def rmse(predictions, targets):
     return np.sqrt(np.mean((predictions - targets)**2))
 
 
-def plot_compare(x1, y1, x2, y2, label1, label2, title, xlabel_name,
-                 ylabel_name, fig_path, ylimit: tuple=None):
+def plot_compare(x1,
+                 y1,
+                 x2,
+                 y2,
+                 label1,
+                 label2,
+                 title,
+                 xlabel_name,
+                 ylabel_name,
+                 fig_path,
+                 ylimit: tuple = None):
     if ylimit:
         plt.ylim(ylimit)
     plt.plot(x1, y1, "o-", label=label1)
@@ -30,14 +39,20 @@ if __name__ == "__main__":
     rmse_dict = {}
 
     for case in cases:
-        if case=="C++":
+        if case == "C++":
             os.system(f"g++ matmul_{case}.cpp -o matmul_{case}")
-        elif case=="OpenBLAS":
-            os.system("gcc -I D:\\OpenBLAS-0.3.18-x64\\include -L D:\\OpenBLAS-0.3.18-x64\\lib .\\matmul_OpenBLAS.c -lopenblas -o matmul_OpenBLAS")
+        elif case == "OpenBLAS":
+            os.system(
+                "gcc -I D:\\OpenBLAS-0.3.18-x64\\include -L D:\\OpenBLAS-0.3.18-x64\\lib .\\matmul_OpenBLAS.c -lopenblas -o matmul_OpenBLAS"
+            )
         elif case.startswith("O"):
-            os.system(f"gcc -{case} matmul_C.c ../matrix.c ../matrix.h -o matmul_{case}")
+            os.system(
+                f"gcc -{case} matmul_C.c ../matrix.c ../matrix.h -o matmul_{case}"
+            )
         else:
-            os.system(f"gcc matmul_{case}.c ../matrix.c ../matrix.h -o matmul_{case}")
+            os.system(
+                f"gcc matmul_{case}.c ../matrix.c ../matrix.h -o matmul_{case}"
+            )
 
         read_time_dict[case] = []
         time_cost_dict[case] = []
