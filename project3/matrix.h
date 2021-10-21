@@ -3,6 +3,7 @@
 #include <time.h>
 
 #define STRASSEN_LOWER_BOUND 128
+#define NAN -1
 
 typedef float REAL_NUMBER;
 typedef struct
@@ -13,6 +14,7 @@ typedef struct
 } matrix;
 
 matrix read_matrix(const char *file_name);
+matrix create_matrix(int nrows, int ncols, REAL_NUMBER fill);
 void delete_matrix(matrix* m);
 
 REAL_NUMBER get_elem(matrix* m, int i, int j);

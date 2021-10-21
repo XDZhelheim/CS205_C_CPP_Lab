@@ -36,22 +36,37 @@ matrix read_matrix(const char* file_name) {
     return m;
 }
 
-void delete_matrix(matrix* m) {
+inline matrix create_matrix(int nrows, int ncols, REAL_NUMBER fill) {
+    matrix m = {
+        .nrows = nrows,
+        .ncols = ncols,
+        .data = (REAL_NUMBER*)malloc(nrows * ncols * sizeof(REAL_NUMBER))};
+
+    if (fill != NAN) {
+        for (int i = 0; i < nrows * ncols; i++) {
+            m.data[i] = fill;
+        }
+    }
+
+    return m;
+}
+
+inline void delete_matrix(matrix* m) {
     m->nrows = 0;
     m->ncols = 0;
     free(m->data);
     m->data = NULL;
 }
 
-REAL_NUMBER get_elem(matrix* m, int i, int j) {
+inline REAL_NUMBER get_elem(matrix* m, int i, int j) {
     return m->data[i * m->ncols + j];
 }
 
-REAL_NUMBER* get_elem_ptr(matrix* m, int i, int j) {
+inline REAL_NUMBER* get_elem_ptr(matrix* m, int i, int j) {
     return m->data + (i * m->ncols + j);
 }
 
-void set_elem(matrix* m, int i, int j, REAL_NUMBER num) {
+inline void set_elem(matrix* m, int i, int j, REAL_NUMBER num) {
     m->data[i * m->ncols + j] = num;
 }
 
@@ -84,13 +99,7 @@ matrix multiply_matrix(matrix* m1, matrix* m2) {
         exit(EXIT_FAILURE);
     }
 
-    matrix res = {
-        .nrows = m1->nrows,
-        .ncols = m2->ncols,
-        .data = (REAL_NUMBER*)malloc(m1->nrows * m2->ncols * sizeof(REAL_NUMBER))};
-    for (int i = 0; i < res.nrows * res.ncols; i++) {
-        res.data[i] = 0;
-    }
+    matrix res = create_matrix(m1->nrows, m2->ncols, 0);
 
     for (int i = 0; i < m1->nrows; i++)
         for (int k = 0; k < m1->ncols; k++)
@@ -107,10 +116,7 @@ matrix add_matrix(matrix* m1, matrix* m2) {
         exit(EXIT_FAILURE);
     }
 
-    matrix res = {
-        .nrows = m1->nrows,
-        .ncols = m1->ncols,
-        .data = (REAL_NUMBER*)malloc(m1->nrows * m1->ncols * sizeof(REAL_NUMBER))};
+    matrix res = create_matrix(m1->nrows, m1->ncols, NAN);
 
     for (int i = 0; i < res.nrows * res.ncols; i++) {
         res.data[i] = m1->data[i] + m2->data[i];
@@ -125,10 +131,7 @@ matrix sub_matrix(matrix* m1, matrix* m2) {
         exit(EXIT_FAILURE);
     }
 
-    matrix res = {
-        .nrows = m1->nrows,
-        .ncols = m1->ncols,
-        .data = (REAL_NUMBER*)malloc(m1->nrows * m1->ncols * sizeof(REAL_NUMBER))};
+    matrix res = create_matrix(m1->nrows, m1->ncols, NAN);
 
     for (int i = 0; i < res.nrows * res.ncols; i++) {
         res.data[i] = m1->data[i] - m2->data[i];
@@ -149,10 +152,7 @@ void copy_matrix(matrix* dst, matrix* src) {
 }
 
 matrix slice_matrix(matrix* m, int row_start, int row_end, int col_start, int col_end) {
-    matrix res = {
-        .nrows = row_end - row_start,
-        .ncols = col_end - col_start,
-        .data = (REAL_NUMBER*)malloc((row_end - row_start) * (col_end - col_start) * sizeof(REAL_NUMBER))};
+    matrix res = create_matrix(row_end - row_start, col_end - col_start, NAN);
 
     for (int i = row_start; i < row_end; i++)
         for (int j = col_start; j < col_end; j++) {
@@ -163,10 +163,7 @@ matrix slice_matrix(matrix* m, int row_start, int row_end, int col_start, int co
 }
 
 matrix merge_matrix(matrix* C11, matrix* C12, matrix* C21, matrix* C22) {
-    matrix C = {
-        .nrows = C11->nrows + C21->nrows,
-        .ncols = C11->ncols + C12->ncols,
-        .data = (REAL_NUMBER*)malloc((C11->nrows + C21->nrows) * (C11->ncols + C12->ncols) * sizeof(REAL_NUMBER))};
+    matrix C = create_matrix(C11->nrows + C21->nrows, C11->ncols + C12->ncols, NAN);
 
     for (int i = 0; i < C11->nrows; i++)
         for (int j = 0; j < C11->ncols; j++) {
