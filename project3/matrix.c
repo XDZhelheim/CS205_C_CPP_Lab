@@ -141,7 +141,7 @@ matrix sub_matrix(matrix* m1, matrix* m2) {
 }
 
 void copy_matrix(matrix* dst, matrix* src) {
-    if (dst->nrows != dst->nrows || src->ncols != src->ncols) {
+    if (src->nrows != dst->nrows || src->ncols != dst->ncols) {
         printf("Copy error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
     }

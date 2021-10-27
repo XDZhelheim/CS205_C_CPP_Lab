@@ -4,4 +4,4 @@ project(MatrixMultiplication)
 
 aux_source_directory(. srcs)
 
-add_executable(matmul ${srcs})
+add_executable(matmul.out ${srcs})
