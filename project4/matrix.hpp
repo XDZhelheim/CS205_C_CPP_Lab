@@ -16,6 +16,8 @@ class matrix {
     int ncols;
     T* data;
 
+    matrix(const matrix<T>& other);
+
     matrix(int nrows, int ncols, T fill);
     ~matrix();
 

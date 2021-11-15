@@ -14,8 +14,18 @@ inline matrix<T>::matrix(int nrows, int ncols, T fill) {
 }
 
 template <typename T>
+inline matrix<T>::matrix(const matrix<T>& other) {
+    this->nrows = other.nrows;
+    this->ncols = other.ncols;
+    this->data = new T[nrows * ncols];
+
+    for (int i = 0; i < this->nrows * this->ncols; i++) {
+        this->data[i] = other.data[i];
+    }
+}
+
+template <typename T>
 inline matrix<T>::~matrix() {
-        cout<<this->data<<endl;
     if (this->data != nullptr) {
         this->nrows = 0;
         this->ncols = 0;
@@ -166,7 +176,6 @@ matrix<T> matrix<T>::merge_matrix(matrix<T>& C11, matrix<T>& C12, matrix<T>& C21
 
 template <typename T>
 matrix<T> multiply_matrix(matrix<T> m1, matrix<T> m2) {
-    cout<<"forloop"<<endl;
     if (m1.ncols != m2.nrows) {
         printf("Multiplication error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
@@ -185,7 +194,6 @@ matrix<T> multiply_matrix(matrix<T> m1, matrix<T> m2) {
 
 template <typename T>
 matrix<T> strassen(matrix<T>& A, matrix<T>& B) {
-    cout<<A.nrows<<endl;
     if (A.nrows != B.nrows || A.ncols != B.ncols) {
         printf("Strassen multiplication error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
@@ -237,14 +245,6 @@ matrix<T> strassen(matrix<T>& A, matrix<T>& B) {
     matrix<T> C22 = P5 + P1 - P3 - P7;
 
     matrix<T> C = matrix<T>::merge_matrix(C11, C12, C21, C22);
-
-    // delete &A11; delete &A12; delete &A21; delete &A22;
-    // delete &B11; delete &B12; delete &B21; delete &B22;
-    // delete &C11; delete &C12; delete &C21; delete &C22;
-    // delete &S1; delete &S2; delete &S3; delete &S4; delete &S5;
-    // delete &S6; delete &S7; delete &S8; delete &S9; delete &S10;
-    // delete &P1; delete &P2; delete &P3; delete &P4;
-    // delete &P5; delete &P6; delete &P7;
 
     return C;
 }
