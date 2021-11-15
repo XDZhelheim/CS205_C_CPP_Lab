@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define STRASSEN_LOWER_BOUND 128
+#define STRASSEN_LOWER_BOUND 1024
 #define NAN -1
 
 template <typename T>
