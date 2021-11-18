@@ -6,6 +6,8 @@ inline matrix<T>::matrix(int nrows, int ncols, T fill) {
     this->ncols = ncols;
     this->data = new T[nrows * ncols];
 
+    this->father_matrix = nullptr;
+
     if (fill != NAN) {
         for (int i = 0; i < nrows * ncols; i++) {
             this->data[i] = fill;
@@ -19,14 +21,24 @@ inline matrix<T>::matrix(const matrix<T>& other) {
     this->ncols = other.ncols;
     this->data = new T[nrows * ncols];
 
+    this->father_matrix = nullptr;
+
     for (int i = 0; i < this->nrows * this->ncols; i++) {
         this->data[i] = other.data[i];
     }
 }
 
 template <typename T>
+inline matrix<T>::matrix(int nrows, int ncols) {
+    this->nrows = nrows;
+    this->ncols = ncols;
+
+    this->father_matrix = nullptr;
+}
+
+template <typename T>
 inline matrix<T>::~matrix() {
-    if (this->data != nullptr) {
+    if (this->father_matrix == nullptr && this->data != nullptr) {
         this->nrows = 0;
         this->ncols = 0;
         delete[] this->data;
@@ -89,11 +101,27 @@ void matrix<T>::print(const char* file_name) {
 
 template <typename T>
 inline T* matrix<T>::operator[](int i) {
+    if (i > this->nrows) {
+        printf("Index error: array index out of bound.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (this->father_matrix != nullptr) {
+        return this->data + i * this->father_matrix->ncols;
+    }
     return this->data + i * this->ncols;
 }
 
 template <typename T>
 inline T& matrix<T>::operator()(int i, int j) {
+    if (i > this->nrows || j > this->ncols) {
+        printf("Index error: array index out of bound.\n");
+        exit(EXIT_FAILURE);
+    }
+    if (this->father_matrix != nullptr) {
+        return this->data[i * this->father_matrix->ncols + j];
+    }
+
     return this->data[i * this->ncols + j];
 }
 
@@ -139,7 +167,17 @@ inline matrix<T> matrix<T>::copy() {
 }
 
 template <typename T>
-matrix<T> matrix<T>::submatrix(int row_start, int row_end, int col_start, int col_end) {
+matrix<T> matrix<T>::submatrix_ROI(int row_start, int row_end, int col_start, int col_end) {
+    matrix<T> res(row_end - row_start, col_end - col_start);
+
+    res.data = this->data + row_start * this->ncols + col_start;
+    res.father_matrix = this;
+
+    return res;
+}
+
+template <typename T>
+matrix<T> matrix<T>::submatrix_cpy(int row_start, int row_end, int col_start, int col_end) {
     matrix<T> res(row_end - row_start, col_end - col_start, NAN);
 
     for (int i = row_start; i < row_end; i++)
@@ -148,6 +186,11 @@ matrix<T> matrix<T>::submatrix(int row_start, int row_end, int col_start, int co
         }
 
     return res;
+}
+
+template <typename T>
+matrix<T> matrix<T>::submatrix(int row_start, int row_end, int col_start, int col_end) {
+    return submatrix_ROI(row_start, row_end, col_start, col_end);
 }
 
 template <typename T>
