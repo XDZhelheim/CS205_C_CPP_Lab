@@ -1,6 +1,25 @@
 #include "matrix.hpp"
 
 template <typename T>
+inline int* matrix<T>::shape() {
+    return new int[2]{this->nrows, this->ncols};
+}
+
+template <typename T>
+inline void matrix<T>::print_shape() {
+    cout << "(" << this->nrows << ", " << this->ncols << ")" << endl;
+}
+
+// ---------------------------------------------------------------------------------
+template <typename T>
+inline matrix<T>::matrix() {
+    this->nrows = 0;
+    this->ncols = 0;
+    this->data = nullptr;
+    this->parent_matrix = nullptr;
+}
+
+template <typename T>
 inline matrix<T>::matrix(int nrows, int ncols, T fill) {
     this->nrows = nrows;
     this->ncols = ncols;
@@ -8,11 +27,18 @@ inline matrix<T>::matrix(int nrows, int ncols, T fill) {
 
     this->parent_matrix = nullptr;
 
-    if (fill != NAN) {
-        for (int i = 0; i < nrows * ncols; i++) {
-            this->data[i] = fill;
-        }
+    for (int i = 0; i < nrows * ncols; i++) {
+        this->data[i] = fill;
     }
+}
+
+template <typename T>
+inline matrix<T>::matrix(int nrows, int ncols) {
+    this->nrows = nrows;
+    this->ncols = ncols;
+    this->data = new T[nrows * ncols];
+
+    this->parent_matrix = nullptr;
 }
 
 template <typename T>
@@ -31,6 +57,16 @@ inline matrix<T>::matrix(const matrix<T>& other) {
 }
 
 template <typename T>
+inline matrix<T>::~matrix() {
+    if (this->parent_matrix == nullptr && this->data != nullptr) {
+        this->nrows = 0;
+        this->ncols = 0;
+        delete[] this->data;
+        this->data = nullptr;
+    }
+}
+
+template <typename T>
 inline matrix<T>& matrix<T>::operator=(matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
@@ -42,21 +78,42 @@ inline matrix<T>& matrix<T>::operator=(matrix<T>& other) {
 }
 
 template <typename T>
-inline matrix<T>::matrix(int nrows, int ncols) {
-    this->nrows = nrows;
-    this->ncols = ncols;
+inline matrix<T> matrix<T>::copy() {
+    matrix<T> res(this->nrows, this->ncols);
 
-    this->parent_matrix = nullptr;
+    for (int i = 0; i < this->nrows * this->ncols; i++) {
+        res.data[i] = this->data[i];
+    }
+
+    return res;
 }
 
 template <typename T>
-inline matrix<T>::~matrix() {
-    if (this->parent_matrix == nullptr && this->data != nullptr) {
-        this->nrows = 0;
-        this->ncols = 0;
-        delete[] this->data;
-        this->data = nullptr;
+matrix<T> matrix<T>::create_row_vec(int ncols, T fill) {
+    return matrix(0, ncols, fill);
+}
+
+template <typename T>
+matrix<T> matrix<T>::create_col_vec(int nrows, T fill) {
+    return matrix(nrows, 0, fill);
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename T>
+ostream& operator<<(ostream& out, const matrix<T>& m) {
+    if (typeid(T) == typeid(double)) {
+        out.precision(15);
     }
+
+    for (int i = 0; i < m.nrows; i++) {
+        for (int j = 0; j < m.ncols; j++) {
+            out << m[i][j] << " ";
+        }
+        out << endl;
+    }
+
+    return out;
 }
 
 template <typename T>
@@ -67,7 +124,7 @@ matrix<T> matrix<T>::read_matrix(const char* file_name) {
         exit(EXIT_FAILURE);
     }
 
-    matrix<T> m(0, 0, NAN);
+    matrix<T> m;
 
     // get ncols and nrows
     T temp = 0;
@@ -112,6 +169,8 @@ void matrix<T>::print(const char* file_name) {
     out.close();
 }
 
+// --------------------------------------------------------------------------------------------
+
 template <typename T>
 inline T* matrix<T>::operator[](int i) {
     if (i > this->nrows) {
@@ -145,7 +204,7 @@ inline matrix<T> matrix<T>::operator+(matrix<T>& other) {
         exit(EXIT_FAILURE);
     }
 
-    matrix<T> res(this->nrows, this->ncols, NAN);
+    matrix<T> res(this->nrows, this->ncols);
 
     for (int i = 0; i < res.nrows * res.ncols; i++) {
         res.data[i] = this->data[i] + other.data[i];
@@ -161,7 +220,7 @@ inline matrix<T> matrix<T>::operator-(matrix<T>& other) {
         exit(EXIT_FAILURE);
     }
 
-    matrix<T> res(this->nrows, this->ncols, NAN);
+    matrix<T> res(this->nrows, this->ncols);
 
     for (int i = 0; i < res.nrows * res.ncols; i++) {
         res.data[i] = this->data[i] - other.data[i];
@@ -171,63 +230,19 @@ inline matrix<T> matrix<T>::operator-(matrix<T>& other) {
 }
 
 template <typename T>
-inline matrix<T> matrix<T>::copy() {
-    matrix<T> res(this->nrows, this->ncols, NAN);
-
-    for (int i = 0; i < this->nrows * this->ncols; i++) {
-        res.data[i] = this->data[i];
+matrix<T> matrix<T>::multiply_elements(matrix<T>& other) {
+    if (this->nrows != other.nrows || this->ncols != other.ncols) {
+        printf("Multiplication error: matrix dimension cannot match.\n");
+        exit(EXIT_FAILURE);
     }
-}
 
-template <typename T>
-matrix<T> matrix<T>::submatrix_ROI(int row_start, int row_end, int col_start, int col_end) {
-    matrix<T> res(row_end - row_start, col_end - col_start);
+    matrix<T> res(this->nrows, this->ncols);
 
-    res.data = this->data + row_start * this->ncols + col_start;
-    res.parent_matrix = this;
+    for (int i = 0; i < res.nrows * res.ncols; i++) {
+        res.data[i] = this->data[i] * other.data[i];
+    }
 
     return res;
-}
-
-template <typename T>
-matrix<T> matrix<T>::submatrix_cpy(int row_start, int row_end, int col_start, int col_end) {
-    matrix<T> res(row_end - row_start, col_end - col_start, NAN);
-
-    for (int i = row_start; i < row_end; i++)
-        for (int j = col_start; j < col_end; j++) {
-            res[i - row_start][j - col_start] = (*this)[i][j];
-        }
-
-    return res;
-}
-
-template <typename T>
-matrix<T> matrix<T>::submatrix(int row_start, int row_end, int col_start, int col_end) {
-    return submatrix_ROI(row_start, row_end, col_start, col_end);
-}
-
-template <typename T>
-matrix<T> matrix<T>::merge_matrix(matrix<T>& C11, matrix<T>& C12, matrix<T>& C21, matrix<T>& C22) {
-    matrix C(C11.nrows + C21.nrows, C11.ncols + C12.ncols, NAN);
-
-    for (int i = 0; i < C11.nrows; i++)
-        for (int j = 0; j < C11.ncols; j++) {
-            C[i][j] = C11[i][j];
-        }
-    for (int i = 0; i < C12.nrows; i++)
-        for (int j = 0; j < C12.ncols; j++) {
-            C[i][j + C11.ncols] = C12[i][j];
-        }
-    for (int i = 0; i < C21.nrows; i++)
-        for (int j = 0; j < C21.ncols; j++) {
-            C[i + C11.nrows][j] = C21[i][j];
-        }
-    for (int i = 0; i < C22.nrows; i++)
-        for (int j = 0; j < C22.ncols; j++) {
-            C[i + C11.nrows][j + C11.ncols] = C22[i][j];
-        }
-
-    return C;
 }
 
 template <typename T>
@@ -308,4 +323,69 @@ matrix<T> strassen(matrix<T>& A, matrix<T>& B) {
 template <typename T>
 matrix<T> matrix<T>::operator*(matrix& other) {
     return strassen<T>(*this, other);
+}
+
+// --------------------------------------------------------------------------------------------
+
+template <typename T>
+matrix<T> matrix<T>::submatrix_ROI(int row_start, int row_end, int col_start, int col_end) {
+    matrix<T> res;
+    res.nrows = row_end - row_start;
+    res.ncols = col_end - col_start;
+
+    res.data = this->data + row_start * this->ncols + col_start;
+    res.parent_matrix = this;
+
+    return res;
+}
+
+template <typename T>
+matrix<T> matrix<T>::submatrix_cpy(int row_start, int row_end, int col_start, int col_end) {
+    matrix<T> res(row_end - row_start, col_end - col_start);
+
+    for (int i = row_start; i < row_end; i++)
+        for (int j = col_start; j < col_end; j++) {
+            res[i - row_start][j - col_start] = (*this)[i][j];
+        }
+
+    return res;
+}
+
+template <typename T>
+matrix<T> matrix<T>::submatrix(int row_start, int row_end, int col_start, int col_end) {
+    return submatrix_ROI(row_start, row_end, col_start, col_end);
+}
+
+template <typename T>
+void matrix<T>::adjust_ROI(int row_start, int row_end, int col_start, int col_end) {
+    if (this->parent_matrix == nullptr) {
+        cout << "ROI adjustment error: not a submatrix." << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    this->data = this->parent_matrix->data + row_start * this->parent_matrix->ncols + col_start;
+}
+
+template <typename T>
+matrix<T> matrix<T>::merge_matrix(matrix<T>& C11, matrix<T>& C12, matrix<T>& C21, matrix<T>& C22) {
+    matrix C(C11.nrows + C21.nrows, C11.ncols + C12.ncols);
+
+    for (int i = 0; i < C11.nrows; i++)
+        for (int j = 0; j < C11.ncols; j++) {
+            C[i][j] = C11[i][j];
+        }
+    for (int i = 0; i < C12.nrows; i++)
+        for (int j = 0; j < C12.ncols; j++) {
+            C[i][j + C11.ncols] = C12[i][j];
+        }
+    for (int i = 0; i < C21.nrows; i++)
+        for (int j = 0; j < C21.ncols; j++) {
+            C[i + C11.nrows][j] = C21[i][j];
+        }
+    for (int i = 0; i < C22.nrows; i++)
+        for (int j = 0; j < C22.ncols; j++) {
+            C[i + C11.nrows][j + C11.ncols] = C22[i][j];
+        }
+
+    return C;
 }
