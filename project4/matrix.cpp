@@ -6,7 +6,7 @@ inline matrix<T>::matrix(int nrows, int ncols, T fill) {
     this->ncols = ncols;
     this->data = new T[nrows * ncols];
 
-    this->father_matrix = nullptr;
+    this->parent_matrix = nullptr;
 
     if (fill != NAN) {
         for (int i = 0; i < nrows * ncols; i++) {
@@ -19,13 +19,26 @@ template <typename T>
 inline matrix<T>::matrix(const matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
-    this->data = new T[nrows * ncols];
 
-    this->father_matrix = nullptr;
+    // set parent matrix to avoid freeing the array twice
+    this->data = other.data;
+    this->parent_matrix = &other;
 
-    for (int i = 0; i < this->nrows * this->ncols; i++) {
-        this->data[i] = other.data[i];
-    }
+    // this->data = new T[nrows * ncols];
+    // for (int i = 0; i < this->nrows * this->ncols; i++) {
+    //     this->data[i] = other.data[i];
+    // }
+}
+
+template <typename T>
+inline matrix<T>& matrix<T>::operator=(matrix<T>& other) {
+    this->nrows = other.nrows;
+    this->ncols = other.ncols;
+
+    this->data = other.data;
+    this->parent_matrix = &other;
+
+    return *this;
 }
 
 template <typename T>
@@ -33,12 +46,12 @@ inline matrix<T>::matrix(int nrows, int ncols) {
     this->nrows = nrows;
     this->ncols = ncols;
 
-    this->father_matrix = nullptr;
+    this->parent_matrix = nullptr;
 }
 
 template <typename T>
 inline matrix<T>::~matrix() {
-    if (this->father_matrix == nullptr && this->data != nullptr) {
+    if (this->parent_matrix == nullptr && this->data != nullptr) {
         this->nrows = 0;
         this->ncols = 0;
         delete[] this->data;
@@ -106,8 +119,8 @@ inline T* matrix<T>::operator[](int i) {
         exit(EXIT_FAILURE);
     }
 
-    if (this->father_matrix != nullptr) {
-        return this->data + i * this->father_matrix->ncols;
+    if (this->parent_matrix != nullptr) {
+        return this->data + i * this->parent_matrix->ncols;
     }
     return this->data + i * this->ncols;
 }
@@ -118,8 +131,8 @@ inline T& matrix<T>::operator()(int i, int j) {
         printf("Index error: array index out of bound.\n");
         exit(EXIT_FAILURE);
     }
-    if (this->father_matrix != nullptr) {
-        return this->data[i * this->father_matrix->ncols + j];
+    if (this->parent_matrix != nullptr) {
+        return this->data[i * this->parent_matrix->ncols + j];
     }
 
     return this->data[i * this->ncols + j];
@@ -171,7 +184,7 @@ matrix<T> matrix<T>::submatrix_ROI(int row_start, int row_end, int col_start, in
     matrix<T> res(row_end - row_start, col_end - col_start);
 
     res.data = this->data + row_start * this->ncols + col_start;
-    res.father_matrix = this;
+    res.parent_matrix = this;
 
     return res;
 }

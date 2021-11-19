@@ -9,6 +9,8 @@ using namespace std;
 #define STRASSEN_LOWER_BOUND 1024
 #define NAN -1
 
+#define INHERITED 1
+
 template <typename T>
 class matrix {
    public:
@@ -16,13 +18,14 @@ class matrix {
     int ncols;
     T* data;
 
-    matrix<T>* father_matrix;
-
-    matrix(const matrix<T>& other);
+    const matrix<T>* parent_matrix;
 
     matrix(int nrows, int ncols);
     matrix(int nrows, int ncols, T fill);
     ~matrix();
+
+    matrix(const matrix<T>& other);
+    matrix<T>& operator=(matrix<T>& other);
 
     T* operator[](int i);
     T& operator()(int i, int j);
