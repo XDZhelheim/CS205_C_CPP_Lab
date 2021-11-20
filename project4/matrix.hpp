@@ -6,8 +6,7 @@
 
 using namespace std;
 
-#define STRASSEN_LOWER_BOUND 1024
-#define NAN -1
+#define STRASSEN_LOWER_BOUND 128
 
 template <typename T>
 class matrix {
@@ -21,6 +20,7 @@ class matrix {
 
     int* shape();
     void print_shape();
+    bool shape_equals(matrix<T>& other);
 
     // construction & destruction
     matrix();
@@ -57,3 +57,9 @@ class matrix {
     void adjust_ROI(int row_start, int row_end, int col_start, int col_end);
     static matrix<T> merge_matrix(matrix<T>& C11, matrix<T>& C12, matrix<T>& C21, matrix<T>& C22);
 };
+
+template <typename T>
+matrix<T> multiply_matrix(matrix<T>& m1, matrix<T>& m2);
+
+template <typename T>
+matrix<T> strassen(matrix<T>& A, matrix<T>& B);

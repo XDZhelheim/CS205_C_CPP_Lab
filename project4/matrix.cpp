@@ -10,6 +10,11 @@ inline void matrix<T>::print_shape() {
     cout << "(" << this->nrows << ", " << this->ncols << ")" << endl;
 }
 
+template <typename T>
+inline bool matrix<T>::shape_equals(matrix<T>& other) {
+    return this->nrows == other.nrows && this->ncols == other.ncols;
+}
+
 // ---------------------------------------------------------------------------------
 template <typename T>
 inline matrix<T>::matrix() {
@@ -199,7 +204,7 @@ inline T& matrix<T>::operator()(int i, int j) {
 
 template <typename T>
 inline matrix<T> matrix<T>::operator+(matrix<T>& other) {
-    if (this->nrows != other.nrows || this->ncols != other.ncols) {
+    if (!this->shape_equals(other)) {
         printf("Addition error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
     }
@@ -215,7 +220,7 @@ inline matrix<T> matrix<T>::operator+(matrix<T>& other) {
 
 template <typename T>
 inline matrix<T> matrix<T>::operator-(matrix<T>& other) {
-    if (this->nrows != other.nrows || this->ncols != other.ncols) {
+    if (!this->shape_equals(other)) {
         printf("Subtraction error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
     }
@@ -230,8 +235,17 @@ inline matrix<T> matrix<T>::operator-(matrix<T>& other) {
 }
 
 template <typename T>
+matrix<T> matrix<T>::operator*(matrix& other) {
+    if (this->shape_equals(other) && this->nrows == this->ncols && (this->nrows & (this->nrows - 1)) == 0) {
+        cout << "Using Strassen algorithm." << endl;
+        return strassen<T>(*this, other);
+    }
+    return multiply_matrix<T>(*this, other);
+}
+
+template <typename T>
 matrix<T> matrix<T>::multiply_elements(matrix<T>& other) {
-    if (this->nrows != other.nrows || this->ncols != other.ncols) {
+    if (!this->shape_equals(other)) {
         printf("Multiplication error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
     }
@@ -246,7 +260,7 @@ matrix<T> matrix<T>::multiply_elements(matrix<T>& other) {
 }
 
 template <typename T>
-matrix<T> multiply_matrix(matrix<T> m1, matrix<T> m2) {
+matrix<T> multiply_matrix(matrix<T>& m1, matrix<T>& m2) {
     if (m1.ncols != m2.nrows) {
         printf("Multiplication error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
@@ -265,7 +279,7 @@ matrix<T> multiply_matrix(matrix<T> m1, matrix<T> m2) {
 
 template <typename T>
 matrix<T> strassen(matrix<T>& A, matrix<T>& B) {
-    if (A.nrows != B.nrows || A.ncols != B.ncols) {
+    if (!A.shape_equals(B)) {
         printf("Strassen multiplication error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
     }
@@ -318,11 +332,6 @@ matrix<T> strassen(matrix<T>& A, matrix<T>& B) {
     matrix<T> C = matrix<T>::merge_matrix(C11, C12, C21, C22);
 
     return C;
-}
-
-template <typename T>
-matrix<T> matrix<T>::operator*(matrix& other) {
-    return strassen<T>(*this, other);
 }
 
 // --------------------------------------------------------------------------------------------
