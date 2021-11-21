@@ -33,8 +33,10 @@ class matrix {
 
     matrix<T>& operator=(matrix<T>& other);
 
-    matrix<T> create_row_vec(int ncols, T fill);
-    matrix<T> create_col_vec(int nrows, T fill);
+    static matrix<T> create_row_vec(int ncols, T fill);
+    static matrix<T> create_col_vec(int nrows, T fill);
+
+    static matrix<T> create_diagonal(int nrows, T fill);
 
     // I/O
     template <typename U> friend ostream& operator<<(ostream& out, const matrix<U>& m);  // mainly used to print matrix on cout
@@ -47,8 +49,12 @@ class matrix {
     matrix<T> operator+(matrix<T>& other);
     matrix<T> operator-(matrix<T>& other);
     matrix<T> operator*(matrix<T>& other);
+    matrix<T> operator^(int expo);
+    matrix<T>& operator*=(matrix<T>& other);
 
     matrix<T> multiply_elements(matrix<T>& other);
+    static matrix<T> multiply_matrix(matrix<T>& m1, matrix<T>& m2);
+    static matrix<T> strassen(matrix<T>& A, matrix<T>& B);
 
     // submatrix and merge matrix
     matrix<T> submatrix_ROI(int row_start, int row_end, int col_start, int col_end);
@@ -58,8 +64,8 @@ class matrix {
     static matrix<T> merge_matrix(matrix<T>& C11, matrix<T>& C12, matrix<T>& C21, matrix<T>& C22);
 };
 
-template <typename T>
-matrix<T> multiply_matrix(matrix<T>& m1, matrix<T>& m2);
+// template <typename T>
+// matrix<T> multiply_matrix(matrix<T>& m1, matrix<T>& m2);
 
-template <typename T>
-matrix<T> strassen(matrix<T>& A, matrix<T>& B);
+// template <typename T>
+// matrix<T> strassen(matrix<T>& A, matrix<T>& B);

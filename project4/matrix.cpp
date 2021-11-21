@@ -76,6 +76,10 @@ inline matrix<T>& matrix<T>::operator=(matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
 
+    if (this->parent_matrix == nullptr && this->data != nullptr) {
+        delete[] this->data;
+    }
+
     this->data = other.data;
     this->parent_matrix = &other;
 
@@ -101,6 +105,15 @@ matrix<T> matrix<T>::create_row_vec(int ncols, T fill) {
 template <typename T>
 matrix<T> matrix<T>::create_col_vec(int nrows, T fill) {
     return matrix(nrows, 0, fill);
+}
+
+template <typename T>
+matrix<T> matrix<T>::create_diagonal(int nrows, T fill) {
+    matrix<T> m = matrix(nrows, nrows);
+
+    for (int i = 0; i < nrows; i++) {
+        m[i][i] = fill;
+    }
 }
 
 // --------------------------------------------------------------------------------------------
@@ -238,9 +251,41 @@ template <typename T>
 matrix<T> matrix<T>::operator*(matrix& other) {
     if (this->shape_equals(other) && this->nrows == this->ncols && (this->nrows & (this->nrows - 1)) == 0) {
         cout << "Using Strassen algorithm." << endl;
-        return strassen<T>(*this, other);
+        return matrix<T>::strassen(*this, other);
     }
-    return multiply_matrix<T>(*this, other);
+    return matrix<T>::multiply_matrix(*this, other);
+}
+
+template <typename T>
+matrix<T> matrix<T>::operator^(int expo) {
+    if (this->nrows != this->ncols) {
+        printf("Power error: matrix is not square.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (expo < 1) {
+        printf("Power error: exponent is less than 1.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    matrix<T> res = matrix<T>::create_diagonal(this->nrows, 1);
+    matrix<T> temp = this->copy();
+
+    while (expo) {
+        if (expo & 1) {
+            res *= temp;
+        }
+        temp *= temp;
+        expo >>= 1;
+    }
+
+    return res;
+}
+
+template <typename T>
+matrix<T>& matrix<T>::operator*=(matrix<T>& other) {
+    *this = (*this) * other;
+    return *this;
 }
 
 template <typename T>
@@ -260,7 +305,7 @@ matrix<T> matrix<T>::multiply_elements(matrix<T>& other) {
 }
 
 template <typename T>
-matrix<T> multiply_matrix(matrix<T>& m1, matrix<T>& m2) {
+matrix<T> matrix<T>::multiply_matrix(matrix<T>& m1, matrix<T>& m2) {
     if (m1.ncols != m2.nrows) {
         printf("Multiplication error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
@@ -278,7 +323,7 @@ matrix<T> multiply_matrix(matrix<T>& m1, matrix<T>& m2) {
 }
 
 template <typename T>
-matrix<T> strassen(matrix<T>& A, matrix<T>& B) {
+matrix<T> matrix<T>::strassen(matrix<T>& A, matrix<T>& B) {
     if (!A.shape_equals(B)) {
         printf("Strassen multiplication error: matrix dimension cannot match.\n");
         exit(EXIT_FAILURE);
@@ -292,7 +337,7 @@ matrix<T> strassen(matrix<T>& A, matrix<T>& B) {
     }
 
     if (N <= STRASSEN_LOWER_BOUND) {
-        return multiply_matrix<T>(A, B);
+        return matrix<T>::multiply_matrix(A, B);
     }
 
     matrix<T> A11 = A.submatrix(0, N / 2, 0, N / 2);
