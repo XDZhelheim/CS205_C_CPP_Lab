@@ -2,8 +2,7 @@
 
 template <typename T>
 inline int* matrix<T>::shape() {
-    // return new int[2]{this->nrows, this->ncols};
-    return nullptr;
+    return new int[2]{this->nrows, this->ncols};
 }
 
 template <typename T>
@@ -59,7 +58,7 @@ inline matrix<T>::matrix(const matrix<T>& other) {
 
     this->data = other.data;
     this->ref_count = other.ref_count;
-    *(this->ref_count) += 1; // do not use ++
+    *(this->ref_count) += 1;  // do not use ++
 }
 
 template <typename T>
@@ -107,16 +106,19 @@ inline matrix<T> matrix<T>::copy() {
 
 template <typename T>
 matrix<T> matrix<T>::create_row_vec(int ncols, T fill) {
-    return matrix(0, ncols, fill);
+    return matrix(1, ncols, fill);
 }
 
 template <typename T>
 matrix<T> matrix<T>::create_col_vec(int nrows, T fill) {
-    return matrix(nrows, 0, fill);
+    return matrix(nrows, 1, fill);
 }
 
 template <typename T>
 matrix<T> matrix<T>::create_diagonal(int nrows, T fill) {
+    if (nrows < 1) {
+        cout << "Diagonal matrix error: nrows < 1" << endl;
+    }
     matrix<T> res = matrix(nrows, nrows);
 
     for (int i = 0; i < nrows; i++) {
@@ -202,7 +204,7 @@ void matrix<T>::print(const char* file_name) {
 template <typename T>
 inline T* matrix<T>::operator[](int i) {
     if (i > this->nrows) {
-        printf("Index error: array index out of bound.\n");
+        cout << "Index error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -215,7 +217,7 @@ inline T* matrix<T>::operator[](int i) {
 template <typename T>
 inline T& matrix<T>::operator()(int i, int j) {
     if (i > this->nrows || j > this->ncols) {
-        printf("Index error: array index out of bound.\n");
+        cout << "Index error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
     if (this->parent_matrix != nullptr) {
@@ -228,7 +230,7 @@ inline T& matrix<T>::operator()(int i, int j) {
 template <typename T>
 inline matrix<T> matrix<T>::operator+(matrix<T>& other) {
     if (!this->shape_equals(other)) {
-        printf("Addition error: matrix dimension cannot match.\n");
+        cout << "Addition error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -244,7 +246,7 @@ inline matrix<T> matrix<T>::operator+(matrix<T>& other) {
 template <typename T>
 inline matrix<T> matrix<T>::operator-(matrix<T>& other) {
     if (!this->shape_equals(other)) {
-        printf("Subtraction error: matrix dimension cannot match.\n");
+        cout << "Subtraction error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -269,12 +271,12 @@ matrix<T> matrix<T>::operator*(matrix& other) {
 template <typename T>
 matrix<T> matrix<T>::operator^(int expo) {
     if (this->nrows != this->ncols) {
-        printf("Power error: matrix is not square.\n");
+        cout << "Power error: matrix is not square." << endl;
         exit(EXIT_FAILURE);
     }
 
     if (expo < 1) {
-        printf("Power error: exponent is less than 1.\n");
+        cout << "Power error: exponent is less than 1." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -301,7 +303,7 @@ matrix<T>& matrix<T>::operator*=(matrix<T>& other) {
 template <typename T>
 matrix<T> matrix<T>::multiply_elements(matrix<T>& other) {
     if (!this->shape_equals(other)) {
-        printf("Multiplication error: matrix dimension cannot match.\n");
+        cout << "Multiplication error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -317,7 +319,7 @@ matrix<T> matrix<T>::multiply_elements(matrix<T>& other) {
 template <typename T>
 matrix<T> matrix<T>::multiply_matrix(matrix<T>& m1, matrix<T>& m2) {
     if (m1.ncols != m2.nrows) {
-        printf("Multiplication error: matrix dimension cannot match.\n");
+        cout << "Multiplication error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -335,14 +337,14 @@ matrix<T> matrix<T>::multiply_matrix(matrix<T>& m1, matrix<T>& m2) {
 template <typename T>
 matrix<T> matrix<T>::strassen(matrix<T>& A, matrix<T>& B) {
     if (!A.shape_equals(B)) {
-        printf("Strassen multiplication error: matrix dimension cannot match.\n");
+        cout << "Strassen multiplication error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
 
     int N = A.nrows;
 
     if ((N & (N - 1)) != 0) {
-        printf("Strassen multiplication error: matrix dimension is not 2^n.\n");
+        cout << "Strassen multiplication error: matrix dimension is not 2^n." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -420,7 +422,11 @@ matrix<T> matrix<T>::submatrix_cpy(int row_start, int row_end, int col_start, in
 
 template <typename T>
 matrix<T> matrix<T>::submatrix(int row_start, int row_end, int col_start, int col_end) {
-    // todo check boundary
+    if (row_start < 0 || row_end > this->nrows - 1 || col_start < 0 || col_end > this->ncols - 1) {
+        cout << "Submatrix error: array index out of bound." << endl;
+        exit(EXIT_FAILURE);
+    }
+
     return submatrix_ROI(row_start, row_end, col_start, col_end);
 }
 
