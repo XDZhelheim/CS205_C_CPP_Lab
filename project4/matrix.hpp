@@ -31,7 +31,7 @@ class matrix {
 
     matrix<T> copy();
 
-    matrix<T>& operator=(matrix<T>& other);
+    matrix<T>& operator=(const matrix<T>& other);
 
     static matrix<T> create_row_vec(int ncols, T fill);
     static matrix<T> create_col_vec(int nrows, T fill);

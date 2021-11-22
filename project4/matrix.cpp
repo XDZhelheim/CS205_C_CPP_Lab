@@ -2,7 +2,8 @@
 
 template <typename T>
 inline int* matrix<T>::shape() {
-    return new int[2]{this->nrows, this->ncols};
+    // return new int[2]{this->nrows, this->ncols};
+    return nullptr;
 }
 
 template <typename T>
@@ -72,7 +73,7 @@ inline matrix<T>::~matrix() {
 }
 
 template <typename T>
-inline matrix<T>& matrix<T>::operator=(matrix<T>& other) {
+inline matrix<T>& matrix<T>::operator=(const matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
 
@@ -114,6 +115,8 @@ matrix<T> matrix<T>::create_diagonal(int nrows, T fill) {
     for (int i = 0; i < nrows; i++) {
         m[i][i] = fill;
     }
+
+    return m;
 }
 
 // --------------------------------------------------------------------------------------------
