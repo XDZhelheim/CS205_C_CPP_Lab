@@ -22,6 +22,8 @@ inline matrix<T>::matrix() {
     this->nrows = 0;
     this->ncols = 0;
     this->data = nullptr;
+
+    this->ref_count = new int(1);
     this->parent_matrix = nullptr;
 }
 
@@ -31,6 +33,7 @@ inline matrix<T>::matrix(int nrows, int ncols, T fill) {
     this->ncols = ncols;
     this->data = new T[nrows * ncols];
 
+    this->ref_count = new int(1);
     this->parent_matrix = nullptr;
 
     for (int i = 0; i < nrows * ncols; i++) {
@@ -44,6 +47,7 @@ inline matrix<T>::matrix(int nrows, int ncols) {
     this->ncols = ncols;
     this->data = new T[nrows * ncols];
 
+    this->ref_count = new int(1);
     this->parent_matrix = nullptr;
 }
 
@@ -51,25 +55,25 @@ template <typename T>
 inline matrix<T>::matrix(const matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
+    this->parent_matrix = nullptr;
 
-    // set parent matrix to avoid freeing the array twice
     this->data = other.data;
-    this->parent_matrix = &other;
-
-    // this->data = new T[nrows * ncols];
-    // for (int i = 0; i < this->nrows * this->ncols; i++) {
-    //     this->data[i] = other.data[i];
-    // }
+    this->ref_count = other.ref_count;
+    *(this->ref_count) += 1; // do not use ++
 }
 
 template <typename T>
 inline matrix<T>::~matrix() {
-    if (this->parent_matrix == nullptr && this->data != nullptr) {
-        this->nrows = 0;
-        this->ncols = 0;
+    // this->nrows = 0;
+    // this->ncols = 0;
+
+    *(this->ref_count) -= 1;
+    if (*(this->ref_count) == 0 && this->data != nullptr) {
         delete[] this->data;
-        this->data = nullptr;
+        delete this->ref_count;
     }
+    this->data = nullptr;
+    this->ref_count = nullptr;
 }
 
 template <typename T>
@@ -77,12 +81,15 @@ inline matrix<T>& matrix<T>::operator=(const matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
 
-    if (this->parent_matrix == nullptr && this->data != nullptr) {
+    *(this->ref_count) -= 1;
+    if (*(this->ref_count) == 0 && this->data != nullptr) {
+        delete this->ref_count;
         delete[] this->data;
     }
 
     this->data = other.data;
-    this->parent_matrix = &other;
+    this->ref_count = other.ref_count;
+    *(this->ref_count) += 1;
 
     return *this;
 }
@@ -110,13 +117,13 @@ matrix<T> matrix<T>::create_col_vec(int nrows, T fill) {
 
 template <typename T>
 matrix<T> matrix<T>::create_diagonal(int nrows, T fill) {
-    matrix<T> m = matrix(nrows, nrows);
+    matrix<T> res = matrix(nrows, nrows);
 
     for (int i = 0; i < nrows; i++) {
-        m[i][i] = fill;
+        res[i][i] = fill;
     }
 
-    return m;
+    return res;
 }
 
 // --------------------------------------------------------------------------------------------
@@ -393,6 +400,9 @@ matrix<T> matrix<T>::submatrix_ROI(int row_start, int row_end, int col_start, in
     res.data = this->data + row_start * this->ncols + col_start;
     res.parent_matrix = this;
 
+    res.ref_count = this->ref_count;
+    *(res.ref_count) += 1;
+
     return res;
 }
 
@@ -410,6 +420,7 @@ matrix<T> matrix<T>::submatrix_cpy(int row_start, int row_end, int col_start, in
 
 template <typename T>
 matrix<T> matrix<T>::submatrix(int row_start, int row_end, int col_start, int col_end) {
+    // todo check boundary
     return submatrix_ROI(row_start, row_end, col_start, col_end);
 }
 

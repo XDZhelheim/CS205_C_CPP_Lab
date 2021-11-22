@@ -17,6 +17,7 @@ class matrix {
     T* data;
 
     const matrix<T>* parent_matrix;
+    int* ref_count;
 
     int* shape();
     void print_shape();
