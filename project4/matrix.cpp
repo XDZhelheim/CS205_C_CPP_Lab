@@ -117,7 +117,7 @@ matrix<T> matrix<T>::create_col_vec(int nrows, T fill) {
 template <typename T>
 matrix<T> matrix<T>::create_diagonal(int nrows, T fill) {
     if (nrows < 1) {
-        cout << "Diagonal matrix error: nrows < 1" << endl;
+        cout << "Diagonal matrix error: rows is less than 1" << endl;
     }
     matrix<T> res = matrix(nrows, nrows);
 
@@ -129,22 +129,6 @@ matrix<T> matrix<T>::create_diagonal(int nrows, T fill) {
 }
 
 // --------------------------------------------------------------------------------------------
-
-template <typename T>
-ostream& operator<<(ostream& out, const matrix<T>& m) {
-    if (typeid(T) == typeid(double)) {
-        out.precision(15);
-    }
-
-    for (int i = 0; i < m.nrows; i++) {
-        for (int j = 0; j < m.ncols; j++) {
-            out << m[i][j] << " ";
-        }
-        out << endl;
-    }
-
-    return out;
-}
 
 template <typename T>
 matrix<T> matrix<T>::read_matrix(const char* file_name) {
@@ -197,6 +181,20 @@ void matrix<T>::print(const char* file_name) {
     }
 
     out.close();
+}
+
+template <typename T>
+void matrix<T>::print() {
+    if (typeid(T) == typeid(double)) {
+        cout.precision(15);
+    }
+
+    for (int i = 0; i < this->nrows; i++) {
+        for (int j = 0; j < this->ncols; j++) {
+            cout << (*this)[i][j] << " ";
+        }
+        cout << endl;
+    }
 }
 
 // --------------------------------------------------------------------------------------------
@@ -262,10 +260,31 @@ inline matrix<T> matrix<T>::operator-(matrix<T>& other) {
 template <typename T>
 matrix<T> matrix<T>::operator*(matrix& other) {
     if (this->shape_equals(other) && this->nrows == this->ncols && (this->nrows & (this->nrows - 1)) == 0) {
-        cout << "Using Strassen algorithm." << endl;
         return matrix<T>::strassen(*this, other);
     }
     return matrix<T>::multiply_matrix(*this, other);
+}
+
+template <typename T>
+matrix<T> matrix<T>::operator*(T coef) {
+    matrix<T> res = this->copy();
+
+    for (int i = 0; i < res.nrows * res.ncols; i++) {
+        res.data[i] *= coef;
+    }
+
+    return res;
+}
+
+template <typename U> 
+matrix<U> operator*(int coef, matrix<U>& m) {
+    matrix<U> res = m.copy();
+
+    for (int i = 0; i < res.nrows * res.ncols; i++) {
+        res.data[i] *= coef;
+    }
+
+    return res;
 }
 
 template <typename T>
@@ -297,6 +316,24 @@ matrix<T> matrix<T>::operator^(int expo) {
 template <typename T>
 matrix<T>& matrix<T>::operator*=(matrix<T>& other) {
     *this = (*this) * other;
+    return *this;
+}
+
+template <typename T>
+matrix<T>& matrix<T>::operator*=(T coef) {
+    *this = (*this) * coef;
+    return *this;
+}
+
+template <typename T>
+matrix<T>& matrix<T>::operator+=(matrix<T>& other) {
+    *this = (*this) + other;
+    return *this;
+}
+
+template <typename T>
+matrix<T>& matrix<T>::operator-=(matrix<T>& other) {
+    *this = (*this) - other;
     return *this;
 }
 
