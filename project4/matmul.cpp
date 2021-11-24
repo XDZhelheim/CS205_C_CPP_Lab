@@ -1,5 +1,6 @@
 #include "matrix.hpp"
 #include "matrix.cpp"
+#include <ctime>
 
 int main(int argc, char const* argv[]) {
     if (argc != 4) {

@@ -1,3 +1,14 @@
+/**
+ * @file matrix.cpp
+ * @author Zheng Dong (11812804@mail.sustech.edu.cn) github.com/XDZhelheim
+ * @brief Implementation of `matrix` class
+ * @version 1.0.0
+ * @date 2021-11-24
+ * 
+ * @copyright Copyright (c) 2021 Zheng Dong
+ * 
+ */
+
 #include "matrix.hpp"
 
 template <typename T>

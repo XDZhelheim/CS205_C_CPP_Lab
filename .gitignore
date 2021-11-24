@@ -47,3 +47,5 @@ temp*
 out*.txt
 test*.txt
 .DS_Store
+
+html/
