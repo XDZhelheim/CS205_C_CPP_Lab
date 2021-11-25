@@ -1,0 +1,19 @@
+digraph "matrix::operator*"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="matrix::operator*",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip="Matrix multiplication."];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="matrix::multiply_matrix",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classmatrix.html#a29b31e61e548be1d9136e02bd0d0786c",tooltip="For-loop matrix multiplication."];
+  Node1 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="matrix::strassen",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classmatrix.html#a97a0414e6562fd53ee47d01fe20f04df",tooltip="Strassen algorithm for matrix multiplication."];
+  Node3 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="matrix::merge_matrix",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classmatrix.html#a47db3db9f26a63dbfdca2a2fa8b140c4",tooltip="Merge four submatrices."];
+  Node3 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="matrix::shape_equals",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classmatrix.html#a2fadc3baccfe7da439f6bb770b680e43",tooltip="Judge if two matrices have the exactly same shape."];
+  Node3 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="matrix::submatrix",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classmatrix.html#a0c10b68c8f4e4fc4d2b62d8b1d94bbf9",tooltip="Alias of submatrix_ROI."];
+}
