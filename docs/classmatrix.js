@@ -20,6 +20,8 @@ var classmatrix =
     [ "print", "classmatrix.html#af9fcc0d416bb06fb318416f70a0d0204", null ],
     [ "operator[]", "classmatrix.html#abc5cc3eef22329fa5756eb171cdbed9b", null ],
     [ "operator()", "classmatrix.html#a66742fc778175a1f627e88a79283dbdf", null ],
+    [ "operator==", "classmatrix.html#a81df2f7691e8b5d2c2145eedde3ee7e6", null ],
+    [ "operator!=", "classmatrix.html#a685fa296c3f4cc52a0b07b99ec84dd69", null ],
     [ "operator+", "classmatrix.html#aa8c9240d6d6a1ee698e7f2575da71afe", null ],
     [ "operator-", "classmatrix.html#a0f64058ef0f6099e74c17f2f5bec98ab", null ],
     [ "operator*", "classmatrix.html#adf3572c9488824f48c85c80a10df8a80", null ],

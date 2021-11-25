@@ -27,8 +27,10 @@ var NAVTREE =
   [ "CS205 Project4: Matrix Class", "index.html", [
     [ "CS205 Project 4 Report", "md__r_e_a_d_m_e.html", [
       [ "1 Introduction", "md__r_e_a_d_m_e.html#autotoc_md3", [
-        [ "1.1 Project Description", "md__r_e_a_d_m_e.html#autotoc_md4", null ]
-      ] ]
+        [ "1.1 Project Description", "md__r_e_a_d_m_e.html#autotoc_md4", null ],
+        [ "1.2 Development Environment", "md__r_e_a_d_m_e.html#autotoc_md5", null ]
+      ] ],
+      [ "2 Design and Implementation", "md__r_e_a_d_m_e.html#autotoc_md6", null ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],

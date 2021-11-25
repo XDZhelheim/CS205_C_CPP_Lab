@@ -269,11 +269,38 @@ class matrix {
      * 
      * `A(2, 5)` is equal to `A[2][5]`. Both are acceptable.
      * 
+     * @note It is recommended to use () operator since it has a more robust boundary check.
+     * 
      * @param i Row index.
      * @param j Column index.
      * @return T& The element.
      */
     T& operator()(int i, int j);
+
+    /**
+     * @brief Judge if two matrices are equal.
+     * 
+     * Two matrices is equal only when:
+     * 1. Same data type
+     * 2. Same shape
+     * 3. Exactly same values, or `data` points to same address
+     * 
+     * @param other Matrix that compares to.
+     * @return true Equal.
+     * @return false Not equal.
+     */
+    bool operator==(matrix<T>& other);
+
+    /**
+     * @brief Judge if two matrices are not equal.
+     * 
+     * A NOT version of operator==(matrix<T>& other).
+     * 
+     * @param other Matrix that compares to.
+     * @return true Not equal.
+     * @return false Equal.
+     */
+    bool operator!=(matrix<T>& other);
 
     /**
      * @brief Matrix addition.

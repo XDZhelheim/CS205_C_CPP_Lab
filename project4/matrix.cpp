@@ -247,6 +247,34 @@ inline T& matrix<T>::operator()(int i, int j) {
 }
 
 template <typename T>
+inline bool matrix<T>::operator==(matrix<T>& other) {
+    if (this == &other) {
+        return true;
+    }
+
+    if (!this->shape_equals(other)) {
+        return false;
+    }
+
+    if (this->data == other.data) {
+        return true;
+    }
+
+    for (int i = 0; i < this->nrows * this->ncols; i++) {
+        if (this->data[i] != other.data[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+template <typename T>
+inline bool matrix<T>::operator!=(matrix<T>& other) {
+    return !(this->operator==(other));
+}
+
+template <typename T>
 inline matrix<T> matrix<T>::operator+(matrix<T>& other) {
     if (!this->shape_equals(other)) {
         cout << "Addition error: matrix dimension cannot match." << endl;
