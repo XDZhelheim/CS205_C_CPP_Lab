@@ -470,7 +470,7 @@ matrix<T> matrix<T>::submatrix_cpy(int row_start, int row_end, int col_start, in
 
 template <typename T>
 matrix<T> matrix<T>::submatrix(int row_start, int row_end, int col_start, int col_end) {
-    if (row_start < 0 || row_end > this->nrows - 1 || col_start < 0 || col_end > this->ncols - 1) {
+    if (row_start < 0 || row_end > this->nrows || col_start < 0 || col_end > this->ncols) {
         cout << "Submatrix error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
@@ -482,6 +482,11 @@ template <typename T>
 void matrix<T>::adjust_ROI(int row_start, int row_end, int col_start, int col_end) {
     if (this->parent_matrix == nullptr) {
         cout << "ROI adjustment error: not a submatrix." << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    if (row_start < 0 || row_end > this->parent_matrix->nrows || col_start < 0 || col_end > this->parent_matrix->ncols) {
+        cout << "ROI adjustment error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
 

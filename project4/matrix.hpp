@@ -16,11 +16,17 @@
 
 using namespace std;
 
+/**
+ * @brief Lower bound of the recursion in Strassen algorithm.
+ * 
+ * If the matrix size is less than it, switch to for-loop multiplication.
+ * @see strassen(matrix<T>& A, matrix<T>& B)
+ */
 #define STRASSEN_LOWER_BOUND 128
 
 /**
  * @brief `matrix` class
- * @tparam T 
+ * @tparam T Template type name.
  */
 template <typename T>
 class matrix {
@@ -49,6 +55,7 @@ class matrix {
      * @brief Pointer of a submatrix's parent
      * 
      * Should be `nullptr` except it is a submatrix.
+     * @see submatrix_ROI(int row_start, int row_end, int col_start, int col_end)
      */
     const matrix<T>* parent_matrix;
 
@@ -261,7 +268,7 @@ class matrix {
      * 
      * Add two matrices. Returns the result matrix.
      * 
-     * @param other Addend.
+     * @param other Adder.
      * @return matrix<T> Sum.
      */
     matrix<T> operator+(matrix<T>& other);
@@ -271,7 +278,7 @@ class matrix {
      * 
      * Subtract two matrices. Returns the result matrix.
      * 
-     * @param other Subtrahend.
+     * @param other Subtracter.
      * @return matrix<T> Difference.
      */
     matrix<T> operator-(matrix<T>& other);
@@ -292,23 +299,194 @@ class matrix {
      */
     matrix<T> operator*(matrix<T>& other);
 
-    
+    /**
+     * @brief Multiply whole matrix by a number.
+     * 
+     * @note The data type of the coefficient will be coverted as the data type of the matrix.
+     * Therefore, it is not recommended to multiply an `int` matrix by a floating point number.
+     * 
+     * @param coef Coefficient.
+     * @return matrix<T> Product.
+     */
     matrix<T> operator*(T coef);
+
+    /**
+     * @brief Multiply an interger by a matrix.
+     * 
+     * @warning Only support `int` to avoid type deducing issues.
+     * 
+     * @tparam U Type name of the template friend function.
+     * @param coef Coefficient.
+     * @param m Matrix.
+     * @return matrix<U> Product.
+     */
     template <typename U> friend matrix<U> operator*(int coef, matrix<U>& m);
+
+    /**
+     * @brief Matrix power.
+     * 
+     * @warning Its shape must be square.
+     * 
+     * Will use fast power algorithm.
+     * 
+     * @param expo Exponent.
+     * @return matrix<T> Power.
+     */
     matrix<T> operator^(int expo);
+
+    /**
+     * @brief Multiplication assignment by another matrix.
+     * 
+     * `m1 *= m2` is equal to `m1 = m1 * m2`.
+     * 
+     * @param other Multiplier.
+     * @return matrix<T>& Product.
+     */
     matrix<T>& operator*=(matrix<T>& other);
+
+    /**
+     * @brief Multiplication assignment by a number.
+     * 
+     * `m1 *= coef` is equal to `m1 = m1 * coef`.
+     * 
+     * @param coef Coefficient.
+     * @return matrix<T>& Product.
+     */
     matrix<T>& operator*=(T coef);
+
+    /**
+     * @brief Addition assignment.
+     * 
+     * `m1 += m2` is equal to `m1 = m1 + m2`.
+     * 
+     * @param other Adder.
+     * @return matrix<T>& Sum.
+     */
     matrix<T>& operator+=(matrix<T>& other);
+
+    /**
+     * @brief Subtraction assignment.
+     * 
+     * `m1 -= m2` is equal to `m1 = m1 - m2`.
+     * 
+     * @param other Subtracter.
+     * @return matrix<T>& Difference.
+     */
     matrix<T>& operator-=(matrix<T>& other);
 
+    /**
+     * @brief Multiply the elements of two matrices.
+     * 
+     * This function multiplies the value at the same position. eg.`A[i][j] * B[i][j]`.
+     * 
+     * Requires same shape.
+     * 
+     * @param other Multiplier.
+     * @return matrix<T> Product.
+     */
     matrix<T> multiply_elements(matrix<T>& other);
+
+    /**
+     * @brief For-loop matrix multiplication.
+     * 
+     * Time complexity: $O(n^3)$
+     * 
+     * @param m1 Multiplicand.
+     * @param m2 Multiplier.
+     * @return matrix<T> Product.
+     */
     static matrix<T> multiply_matrix(matrix<T>& m1, matrix<T>& m2);
+
+    /**
+     * @brief Strassen algorithm for matrix multiplication.
+     * 
+     * Time complexity: approx. $O(n^{2.7})$
+     * 
+     * When the size of the matrix is less or equal than STRASSEN_LOWER_BOUND, it will switch to for-loop multiplication.
+     * 
+     * @param A Multiplicand.
+     * @param B Multiplier.
+     * @return matrix<T> Product.
+     */
     static matrix<T> strassen(matrix<T>& A, matrix<T>& B);
 
     // submatrix and merge matrix -------------------------------------------------------------------------------------------------------
+    /**
+     * @brief Get a submatrix with ROI concept.
+     * 
+     * Create a submatrix by set the `data` pointer to the specified position.
+     * 
+     * Therefore, the submatrix shares the same array with parent.
+     * 
+     * As a result, if submatrix is modified, the value in parent matrix will be changed together.
+     * 
+     * `parent_matrix` pointer will be set.
+     * 
+     * @note [row_start, row_end) [col_start, col_end)
+     * 
+     * @param row_start Top left corner.
+     * @param row_end Top right corner.
+     * @param col_start Bottom left corner.
+     * @param col_end Bottom right corner.
+     * @return matrix<T> Submatrix.
+     */
     matrix<T> submatrix_ROI(int row_start, int row_end, int col_start, int col_end);
+
+    /**
+     * @brief Create a submatrix by hard copy.
+     * 
+     * Create a new matrix, and assign values from parent.
+     * 
+     * @note `parent_matrix` will not be set.
+     * 
+     * @note [row_start, row_end) [col_start, col_end)
+     * 
+     * @param row_start Top left corner.
+     * @param row_end Top right corner.
+     * @param col_start Bottom left corner.
+     * @param col_end Bottom right corner.
+     * @return matrix<T> Submatrix.
+     */
     matrix<T> submatrix_cpy(int row_start, int row_end, int col_start, int col_end);
+
+    /**
+     * @brief Alias of submatrix_ROI.
+     * 
+     * @note [row_start, row_end) [col_start, col_end)
+     * 
+     * @param row_start Top left corner.
+     * @param row_end Top right corner.
+     * @param col_start Bottom left corner.
+     * @param col_end Bottom right corner.
+     * @return matrix<T> Submatrix.
+     */
     matrix<T> submatrix(int row_start, int row_end, int col_start, int col_end);
+
+    /**
+     * @brief Adjust the location of ROI.
+     * 
+     * Must be a submatrix, i.e. `parent_matrix` is not `nullptr`.
+     * 
+     * @param row_start New top left corner.
+     * @param row_end New top right corner.
+     * @param col_start New bottom left corner.
+     * @param col_end New bottom right corner.
+     */
     void adjust_ROI(int row_start, int row_end, int col_start, int col_end);
+
+    /**
+     * @brief Merge four submatrices.
+     * 
+     * Mainly used in Strassen algorithm.
+     * @see strassen(matrix<T>& A, matrix<T>& B)
+     * 
+     * @note [row_start, row_end) [col_start, col_end)
+     * 
+     * @param C11 Top left submatrix.
+     * @param C12 Top right submatrix.
+     * @param C21 Bottom left submatrix.
+     * @param C22 Bottom right submatrix.
+     * @return matrix<T> Merged matrix.
+     */
     static matrix<T> merge_matrix(matrix<T>& C11, matrix<T>& C12, matrix<T>& C21, matrix<T>& C22);
 };
