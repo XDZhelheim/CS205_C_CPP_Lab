@@ -68,6 +68,18 @@ class matrix {
 
    public:
     /**
+     * @brief Get the number of rows.
+     * @return int Number of rows.
+     */
+    int get_nrows();
+
+    /**
+     * @brief Get the number of columns.
+     * @return int Number of columns.
+     */
+    int get_ncols();
+
+    /**
      * @brief Get an array: `[nrows, ncols]`.
      * 
      * @return int* 

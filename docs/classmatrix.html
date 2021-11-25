@@ -99,6 +99,12 @@ $(document).ready(function(){initNavTree('classmatrix.html',''); initResizable()
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:ad96c69ae8808d59aba7512d7c1c6953c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmatrix.html#ad96c69ae8808d59aba7512d7c1c6953c">get_nrows</a> ()</td></tr>
+<tr class="memdesc:ad96c69ae8808d59aba7512d7c1c6953c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of rows.  <a href="classmatrix.html#ad96c69ae8808d59aba7512d7c1c6953c">More...</a><br /></td></tr>
+<tr class="separator:ad96c69ae8808d59aba7512d7c1c6953c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42030a7c625003c7e728112129435adb"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmatrix.html#a42030a7c625003c7e728112129435adb">get_ncols</a> ()</td></tr>
+<tr class="memdesc:a42030a7c625003c7e728112129435adb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of columns.  <a href="classmatrix.html#a42030a7c625003c7e728112129435adb">More...</a><br /></td></tr>
+<tr class="separator:a42030a7c625003c7e728112129435adb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cea2b80908bebeddb8cc14a2000ed6c"><td class="memItemLeft" align="right" valign="top">int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmatrix.html#a5cea2b80908bebeddb8cc14a2000ed6c">shape</a> ()</td></tr>
 <tr class="memdesc:a5cea2b80908bebeddb8cc14a2000ed6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an array: <code>[nrows, ncols]</code>.  <a href="classmatrix.html#a5cea2b80908bebeddb8cc14a2000ed6c">More...</a><br /></td></tr>
 <tr class="separator:a5cea2b80908bebeddb8cc14a2000ed6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -451,6 +457,60 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="ad96c69ae8808d59aba7512d7c1c6953c" name="ad96c69ae8808d59aba7512d7c1c6953c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad96c69ae8808d59aba7512d7c1c6953c">&#9670;&nbsp;</a></span>get_nrows()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="classmatrix.html">matrix</a>&lt; T &gt;::get_nrows</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the number of rows. </p>
+<dl class="section return"><dt>Returns</dt><dd>int Number of rows. </dd></dl>
+
+</div>
+</div>
+<a id="a42030a7c625003c7e728112129435adb" name="a42030a7c625003c7e728112129435adb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42030a7c625003c7e728112129435adb">&#9670;&nbsp;</a></span>get_ncols()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int <a class="el" href="classmatrix.html">matrix</a>&lt; T &gt;::get_ncols</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the number of columns. </p>
+<dl class="section return"><dt>Returns</dt><dd>int Number of columns. </dd></dl>
+
+</div>
+</div>
 <a id="a5cea2b80908bebeddb8cc14a2000ed6c" name="a5cea2b80908bebeddb8cc14a2000ed6c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5cea2b80908bebeddb8cc14a2000ed6c">&#9670;&nbsp;</a></span>shape()</h2>
 
@@ -514,11 +574,6 @@ template&lt;typename T &gt; </div>
 <dl class="section return"><dt>Returns</dt><dd>true Same shape. </dd>
 <dd>
 false Different shape. </dd></dl>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classmatrix_a2fadc3baccfe7da439f6bb770b680e43_icgraph.png" border="0" usemap="#aclassmatrix_a2fadc3baccfe7da439f6bb770b680e43_icgraph" alt=""/></div>
-</div>
 
 </div>
 </div>
@@ -734,11 +789,6 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>matrix&lt;T&gt; Diagonal matrix. </dd></dl>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classmatrix_a14090cbb3cfb87aa2eb35afb1bc4458f_icgraph.png" border="0" usemap="#aclassmatrix_a14090cbb3cfb87aa2eb35afb1bc4458f_icgraph" alt=""/></div>
-</div>
 
 </div>
 </div>
@@ -1004,11 +1054,6 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>matrix&lt;T&gt; Product. </dd></dl>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classmatrix_adf3572c9488824f48c85c80a10df8a80_cgraph.png" border="0" usemap="#aclassmatrix_adf3572c9488824f48c85c80a10df8a80_cgraph" alt=""/></div>
-</div>
 
 </div>
 </div>
@@ -1070,11 +1115,6 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>matrix&lt;T&gt; Power. </dd></dl>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classmatrix_a02c56d1162f9f4b2d3a75e5cd4a50501_cgraph.png" border="0" usemap="#aclassmatrix_a02c56d1162f9f4b2d3a75e5cd4a50501_cgraph" alt=""/></div>
-</div>
 
 </div>
 </div>
@@ -1275,11 +1315,6 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>matrix&lt;T&gt; Product. </dd></dl>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classmatrix_a29b31e61e548be1d9136e02bd0d0786c_icgraph.png" border="0" usemap="#aclassmatrix_a29b31e61e548be1d9136e02bd0d0786c_icgraph" alt=""/></div>
-</div>
 
 </div>
 </div>
@@ -1330,16 +1365,6 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>matrix&lt;T&gt; Product. </dd></dl>
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classmatrix_a97a0414e6562fd53ee47d01fe20f04df_cgraph.png" border="0" usemap="#aclassmatrix_a97a0414e6562fd53ee47d01fe20f04df_cgraph" alt=""/></div>
-</div>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classmatrix_a97a0414e6562fd53ee47d01fe20f04df_icgraph.png" border="0" usemap="#aclassmatrix_a97a0414e6562fd53ee47d01fe20f04df_icgraph" alt=""/></div>
-</div>
 
 </div>
 </div>
@@ -1512,11 +1537,6 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>matrix&lt;T&gt; Submatrix. </dd></dl>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classmatrix_a0c10b68c8f4e4fc4d2b62d8b1d94bbf9_icgraph.png" border="0" usemap="#aclassmatrix_a0c10b68c8f4e4fc4d2b62d8b1d94bbf9_icgraph" alt=""/></div>
-</div>
 
 </div>
 </div>
@@ -1635,11 +1655,6 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>matrix&lt;T&gt; Merged matrix. </dd></dl>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classmatrix_a47db3db9f26a63dbfdca2a2fa8b140c4_icgraph.png" border="0" usemap="#aclassmatrix_a47db3db9f26a63dbfdca2a2fa8b140c4_icgraph" alt=""/></div>
-</div>
 
 </div>
 </div>

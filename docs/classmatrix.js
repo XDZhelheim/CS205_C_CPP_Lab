@@ -5,6 +5,8 @@ var classmatrix =
     [ "matrix", "classmatrix.html#a6f62ee2a5119fcd121e6a24d86b0c702", null ],
     [ "matrix", "classmatrix.html#a2f1a580c432257af7422c58eb427f550", null ],
     [ "~matrix", "classmatrix.html#afe1e7dd7db471f3299bd5d717caeaa6a", null ],
+    [ "get_nrows", "classmatrix.html#ad96c69ae8808d59aba7512d7c1c6953c", null ],
+    [ "get_ncols", "classmatrix.html#a42030a7c625003c7e728112129435adb", null ],
     [ "shape", "classmatrix.html#a5cea2b80908bebeddb8cc14a2000ed6c", null ],
     [ "print_shape", "classmatrix.html#af11cc6f89b0460fe4b70a281ce52cd6b", null ],
     [ "shape_equals", "classmatrix.html#a2fadc3baccfe7da439f6bb770b680e43", null ],

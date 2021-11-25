@@ -12,6 +12,16 @@
 #include "matrix.hpp"
 
 template <typename T>
+inline int matrix<T>::get_nrows() {
+    return this->nrows;
+}
+
+template <typename T>
+inline int matrix<T>::get_ncols() {
+    return this->ncols;
+}
+
+template <typename T>
 inline int* matrix<T>::shape() {
     return new int[2]{this->nrows, this->ncols};
 }
@@ -212,7 +222,7 @@ void matrix<T>::print() {
 
 template <typename T>
 inline T* matrix<T>::operator[](int i) {
-    if (i > this->nrows) {
+    if (i > this->nrows - 1) {
         cout << "Index error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
@@ -225,7 +235,7 @@ inline T* matrix<T>::operator[](int i) {
 
 template <typename T>
 inline T& matrix<T>::operator()(int i, int j) {
-    if (i > this->nrows || j > this->ncols) {
+    if (i > this->nrows - 1 || j > this->ncols - 1) {
         cout << "Index error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
@@ -287,7 +297,7 @@ matrix<T> matrix<T>::operator*(T coef) {
     return res;
 }
 
-template <typename U> 
+template <typename U>
 matrix<U> operator*(int coef, matrix<U>& m) {
     matrix<U> res = m.copy();
 
@@ -400,15 +410,15 @@ matrix<T> matrix<T>::strassen(matrix<T>& A, matrix<T>& B) {
         return matrix<T>::multiply_matrix(A, B);
     }
 
-    matrix<T> A11 = A.submatrix(0, N / 2, 0, N / 2);
-    matrix<T> A12 = A.submatrix(0, N / 2, N / 2, N);
-    matrix<T> A21 = A.submatrix(N / 2, N, 0, N / 2);
-    matrix<T> A22 = A.submatrix(N / 2, N, N / 2, N);
+    matrix<T> A11 = A.submatrix_cpy(0, N / 2, 0, N / 2);
+    matrix<T> A12 = A.submatrix_cpy(0, N / 2, N / 2, N);
+    matrix<T> A21 = A.submatrix_cpy(N / 2, N, 0, N / 2);
+    matrix<T> A22 = A.submatrix_cpy(N / 2, N, N / 2, N);
 
-    matrix<T> B11 = B.submatrix(0, N / 2, 0, N / 2);
-    matrix<T> B12 = B.submatrix(0, N / 2, N / 2, N);
-    matrix<T> B21 = B.submatrix(N / 2, N, 0, N / 2);
-    matrix<T> B22 = B.submatrix(N / 2, N, N / 2, N);
+    matrix<T> B11 = B.submatrix_cpy(0, N / 2, 0, N / 2);
+    matrix<T> B12 = B.submatrix_cpy(0, N / 2, N / 2, N);
+    matrix<T> B21 = B.submatrix_cpy(N / 2, N, 0, N / 2);
+    matrix<T> B22 = B.submatrix_cpy(N / 2, N, N / 2, N);
 
     matrix<T> S1 = B12 - B22;
     matrix<T> S2 = A11 + A12;
@@ -447,8 +457,13 @@ matrix<T> matrix<T>::submatrix_ROI(int row_start, int row_end, int col_start, in
     res.nrows = row_end - row_start;
     res.ncols = col_end - col_start;
 
-    res.data = this->data + row_start * this->ncols + col_start;
-    res.parent_matrix = this;
+    if (this->parent_matrix == nullptr) {
+        res.data = this->data + row_start * this->ncols + col_start;
+        res.parent_matrix = this;
+    } else {
+        res.data = this->data + row_start * this->parent_matrix->ncols + col_start;
+        res.parent_matrix = this->parent_matrix;
+    }
 
     res.ref_count = this->ref_count;
     *(res.ref_count) += 1;
