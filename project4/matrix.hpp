@@ -26,6 +26,9 @@ using namespace std;
 
 /**
  * @brief `matrix` class
+ * 
+ * A data structure for matrix. Contains some basic opeartions.
+ * 
  * @tparam T Template type name.
  */
 template <typename T>
@@ -47,7 +50,7 @@ class matrix {
      * 
      * Will be shared when perform copy construction or assignment operation (shallow copy). @see matrix(const matrix<T>& other) operator=(const matrix<T>& other)
      * 
-     * Will be freed only when `ref_count` decrases to zero. @see ~matrix()
+     * Will be freed only when `ref_count` decreases to zero. @see ~matrix()
      */
     T* data;
 
@@ -62,7 +65,7 @@ class matrix {
     /**
      * @brief Count the number of matrices that share the same `data`.
      * 
-     * `data` will be freed only when `ref_count` decrases to zero.
+     * `data` will be freed only when `ref_count` decreases to zero.
      */
     int* ref_count;
 

@@ -90,7 +90,21 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <li class="level2"><a href="#autotoc_md5">1.2 Development Environment</a></li>
 </ul>
 </li>
-<li class="level1"><a href="#autotoc_md6">2 Design and Implementation</a></li>
+<li class="level1"><a href="#autotoc_md6">2 Design and Implementation</a><ul><li class="level2"><a href="#autotoc_md7">2.1 Fields Of Matrix Class</a></li>
+<li class="level2"><a href="#autotoc_md8">2.2 Constructor: Avoid Mem Copy</a></li>
+<li class="level2"><a href="#autotoc_md9">2.3 ROI For Submatrix</a><ul><li class="level3"><a href="#autotoc_md10">2.3.1 Multi-level Submatrix</a></li>
+<li class="level3"><a href="#autotoc_md11">2.3.2 Submatrix Deletion</a></li>
+<li class="level3"><a href="#autotoc_md12">2.3.3 ROI Adjustment</a></li>
+</ul>
+</li>
+<li class="level2"><a href="#autotoc_md13">2.4 Matrix Operations</a><ul><li class="level3"><a href="#autotoc_md14">2.4.1 Index Operator</a></li>
+<li class="level3"><a href="#autotoc_md15">2.4.2 Other Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="level1"><a href="#autotoc_md16">3 x86 and ARM</a></li>
+<li class="level1"><a href="#autotoc_md17">4 Conclusion</a></li>
 </ul>
 </div>
 <div class="textblock"><p >11812804 董正</p>
@@ -99,6 +113,7 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <h1><a class="anchor" id="autotoc_md3"></a>
 1 Introduction</h1>
 <p >The documentation of class <code>matrix</code> is hosted on <a href="https://xdzhelheim.github.io/CS205_C_CPP_Lab/classmatrix.html">my GitHub</a>.</p>
+<p ><img src="../project4/images/doc.png" alt="" class="inline"/></p>
 <p >Alternatively, view this report online <a href="https://xdzhelheim.github.io/CS205_C_CPP_Lab/md__r_e_a_d_m_e.html">here</a>.</p>
 <h2><a class="anchor" id="autotoc_md4"></a>
 1.1 Project Description</h2>
@@ -133,6 +148,241 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 </ul>
 <h1><a class="anchor" id="autotoc_md6"></a>
 2 Design and Implementation</h1>
+<p >Header files and macros used in this section:</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">#include &lt;fstream&gt;</div>
+<div class="line">#include &lt;iostream&gt;</div>
+<div class="line"> </div>
+<div class="line">#define STRASSEN_LOWER_BOUND 128</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md7"></a>
+2.1 Fields Of Matrix Class</h2>
+<p >To support different data types, I used template class.</p>
+<p ><code>matrix</code> class has three basic fields:</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">class matrix {</div>
+<div class="line">    int nrows;</div>
+<div class="line">    int ncols;</div>
+<div class="line">    T* data;</div>
+<div class="line">    </div>
+<div class="line">    ...</div>
+<div class="line">}</div>
+</div><!-- fragment --><p ><code>data</code> is a 1D dynamic array containing all the elements of the matrix.</p>
+<p >To avoid memory copy, I added a field named <code>ref_count</code>:</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">int* ref_count;</div>
+</div><!-- fragment --><p >See details in section 2.2 below.</p>
+<p >To support ROI, I used another pointer:</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">const matrix&lt;T&gt;* parent_matrix;</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md8"></a>
+2.2 Constructor: Avoid Mem Copy</h2>
+<p >As the project required, it is forbidden to use hard copy if a matrix object is assigned to another.</p>
+<p >If use soft copy directly, there will be an error when freeing <code>data</code> array:</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">matrix&lt;int&gt; m2 = m1; // will set m2.data = m1.data</div>
+</div><!-- fragment --><p >Therefore, when destructing <code>m1</code> and <code>m2</code>, since their <code>data</code> field is pointing to the same address, the array will be freed twice.</p>
+<p >A solution is to override destructor and do not free <code>data</code>. But it will cause memory leak.</p>
+<p >To solve this, I referenced <code>cv::Mat</code> and added a field <code>int* ref_count</code>. It serves like a global integer for each allocated array.</p>
+<p >The idea is described in the following picture:</p>
+<p ><img src="../project4/images/ref_count.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p >When destructing a matrix, just decrease the integer that <code>ref_count</code> points to.</p>
+<p >Example: delete <code>m3, m4</code>.</p>
+<p ><img src="../project4/images/ref_count-1.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p >When <code>ref_count</code> decreases to 0, the array will be finally freed.</p>
+<p >Therefore, the destructor is:</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">inline matrix&lt;T&gt;::~matrix() { // version 1</div>
+<div class="line">    *(this-&gt;ref_count) -= 1;</div>
+<div class="line">    if (*(this-&gt;ref_count) == 0 &amp;&amp; this-&gt;data != nullptr) {</div>
+<div class="line">        delete[] this-&gt;data;</div>
+<div class="line">        delete this-&gt;ref_count;</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --><p >And for copy constructor, just do soft copy, and increase <code>ref_count</code> by 1.</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">inline matrix&lt;T&gt;::matrix(const matrix&lt;T&gt;&amp; other) {</div>
+<div class="line">    this-&gt;nrows = other.nrows;</div>
+<div class="line">    this-&gt;ncols = other.ncols;</div>
+<div class="line">    this-&gt;parent_matrix = nullptr;</div>
+<div class="line"> </div>
+<div class="line">    this-&gt;data = other.data;</div>
+<div class="line">    this-&gt;ref_count = other.ref_count;</div>
+<div class="line">    *(this-&gt;ref_count) += 1;</div>
+<div class="line">}</div>
+</div><!-- fragment --><p >For assignment operator, be sure to free data if it is the last reference of the array.</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">inline matrix&lt;T&gt;&amp; matrix&lt;T&gt;::operator=(const matrix&lt;T&gt;&amp; other) {</div>
+<div class="line">    this-&gt;nrows = other.nrows;</div>
+<div class="line">    this-&gt;ncols = other.ncols;</div>
+<div class="line"> </div>
+<div class="line">    *(this-&gt;ref_count) -= 1;</div>
+<div class="line">    if (*(this-&gt;ref_count) == 0 &amp;&amp; this-&gt;data != nullptr) {</div>
+<div class="line">        delete this-&gt;ref_count;</div>
+<div class="line">        delete[] this-&gt;data;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    this-&gt;data = other.data;</div>
+<div class="line">    this-&gt;ref_count = other.ref_count;</div>
+<div class="line">    *(this-&gt;ref_count) += 1;</div>
+<div class="line"> </div>
+<div class="line">    return *this;</div>
+<div class="line">}</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md9"></a>
+2.3 ROI For Submatrix</h2>
+<p >In my understanding, ROI is a concept of submatrix that shares data with its parent matrix.</p>
+<p >To use ROI correctly, we need to know the shape of its parent matrix's size. Because when we get the <code>[i][j]</code> position element, we need to know the columns of its parent matrix in order to translate <code>i</code> and <code>j</code> to the correct position in the whole array.</p>
+<p >i.e. <code>sub[i][j]==sub.data[i * parent.ncols + j]</code>.</p>
+<p >So the design is very clear. Use a <code>parent_matrix</code> pointer to store its parent:</p>
+<p ><img src="../project4/images/ROI.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p >However, here comes two problems with this design.</p>
+<h3><a class="anchor" id="autotoc_md10"></a>
+2.3.1 Multi-level Submatrix</h3>
+<p >The first is, multi-level submatrix.</p>
+<p >One choice is to concatenate them like a linked-list:</p>
+<p ><img src="../project4/images/ROI-ll.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p >It is unacceptable because <code>sub_sub_m1[i][j]==sub_sub_m1.data[i * sub_sub_m1-&gt;parent_matrix-&gt;ncols + j]==sub_sub_m1.data[i * sub_m1.ncols + j]</code> and it is wrong.</p>
+<p >Therefore, we must let all the submatrices point to the root matrix.</p>
+<p ><img src="../project4/images/ROI-uf.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p >Thus, the submatrix construction function is:</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">matrix&lt;T&gt; matrix&lt;T&gt;::submatrix_ROI(int row_start, int row_end, int col_start, int col_end) {</div>
+<div class="line">    matrix&lt;T&gt; res;</div>
+<div class="line">    res.nrows = row_end - row_start;</div>
+<div class="line">    res.ncols = col_end - col_start;</div>
+<div class="line"> </div>
+<div class="line">    if (this-&gt;parent_matrix == nullptr) {</div>
+<div class="line">        res.data = this-&gt;data + row_start * this-&gt;ncols + col_start;</div>
+<div class="line">        res.parent_matrix = this;</div>
+<div class="line">    } else {</div>
+<div class="line">        res.data = this-&gt;data + row_start * this-&gt;parent_matrix-&gt;ncols + col_start;</div>
+<div class="line">        res.parent_matrix = this-&gt;parent_matrix;</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    res.ref_count = this-&gt;ref_count;</div>
+<div class="line">    *(res.ref_count) += 1;</div>
+<div class="line"> </div>
+<div class="line">    return res;</div>
+<div class="line">}</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md11"></a>
+2.3.2 Submatrix Deletion</h3>
+<p >The second problem is the case that delete parent matrix before delete all submatrices.</p>
+<p ><img src="../project4/images/ROI-delete.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p >When delete <code>sub_m1</code>, we should delete <code>m1.data</code>, not <code>sub_m1.data</code> because it is not the head address.</p>
+<p >Therefore, <code>~matrix()</code> should be modified:</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">inline matrix&lt;T&gt;::~matrix() {</div>
+<div class="line">    *(this-&gt;ref_count) -= 1;</div>
+<div class="line">    if (*(this-&gt;ref_count) == 0 &amp;&amp; this-&gt;data != nullptr) {</div>
+<div class="line">        if (this-&gt;parent_matrix == nullptr) {</div>
+<div class="line">            delete[] this-&gt;data;</div>
+<div class="line">        } else {  // it is a submatrix</div>
+<div class="line">            delete[] this-&gt;parent_matrix-&gt;data;</div>
+<div class="line">        }</div>
+<div class="line">        delete this-&gt;ref_count;</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md12"></a>
+2.3.3 ROI Adjustment</h3>
+<p >Change the address of <code>data</code> pointer.</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">void matrix&lt;T&gt;::adjust_ROI(int row_start, int row_end, int col_start, int col_end) {</div>
+<div class="line">    if (this-&gt;parent_matrix == nullptr) {</div>
+<div class="line">        cout &lt;&lt; &quot;ROI adjustment error: not a submatrix.&quot; &lt;&lt; endl;</div>
+<div class="line">        exit(EXIT_FAILURE);</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    if (row_start &lt; 0 || row_end &gt; this-&gt;parent_matrix-&gt;nrows || col_start &lt; 0 || col_end &gt; this-&gt;parent_matrix-&gt;ncols) {</div>
+<div class="line">        cout &lt;&lt; &quot;ROI adjustment error: array index out of bound.&quot; &lt;&lt; endl;</div>
+<div class="line">        exit(EXIT_FAILURE);</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    this-&gt;nrows = row_end - row_start;</div>
+<div class="line">    this-&gt;ncols = col_end - col_start;</div>
+<div class="line">    this-&gt;data = this-&gt;parent_matrix-&gt;data + row_start * this-&gt;parent_matrix-&gt;ncols + col_start;</div>
+<div class="line">}</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md13"></a>
+2.4 Matrix Operations</h2>
+<h3><a class="anchor" id="autotoc_md14"></a>
+2.4.1 Index Operator</h3>
+<p >Since the data is stored in a 1d array, we need an API to access elements like a 2d array. Be careful of submatrices.</p>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">inline T* matrix&lt;T&gt;::operator[](int i) {</div>
+<div class="line">    if (i &gt; this-&gt;nrows - 1) {</div>
+<div class="line">        cout &lt;&lt; &quot;Index error: array index out of bound.&quot; &lt;&lt; endl;</div>
+<div class="line">        exit(EXIT_FAILURE);</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    if (this-&gt;parent_matrix != nullptr) {</div>
+<div class="line">        return this-&gt;data + i * this-&gt;parent_matrix-&gt;ncols;</div>
+<div class="line">    }</div>
+<div class="line">    return this-&gt;data + i * this-&gt;ncols;</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line">template &lt;typename T&gt;</div>
+<div class="line">inline T&amp; matrix&lt;T&gt;::operator()(int i, int j) {</div>
+<div class="line">    if (i &gt; this-&gt;nrows - 1 || j &gt; this-&gt;ncols - 1) {</div>
+<div class="line">        cout &lt;&lt; &quot;Index error: array index out of bound.&quot; &lt;&lt; endl;</div>
+<div class="line">        exit(EXIT_FAILURE);</div>
+<div class="line">    }</div>
+<div class="line">    if (this-&gt;parent_matrix != nullptr) {</div>
+<div class="line">        return this-&gt;data[i * this-&gt;parent_matrix-&gt;ncols + j];</div>
+<div class="line">    }</div>
+<div class="line"> </div>
+<div class="line">    return this-&gt;data[i * this-&gt;ncols + j];</div>
+<div class="line">}</div>
+</div><!-- fragment --><h3><a class="anchor" id="autotoc_md15"></a>
+2.4.2 Other Functions</h3>
+<div class="fragment"><div class="line"> {c++}</div>
+<div class="line">bool operator==(matrix&lt;T&gt;&amp; other);</div>
+<div class="line">bool operator!=(matrix&lt;T&gt;&amp; other);</div>
+<div class="line">matrix&lt;T&gt; operator+(matrix&lt;T&gt;&amp; other);</div>
+<div class="line">matrix&lt;T&gt; operator-(matrix&lt;T&gt;&amp; other);</div>
+<div class="line">matrix&lt;T&gt; operator*(matrix&lt;T&gt;&amp; other);</div>
+<div class="line">matrix&lt;T&gt; operator*(T coef);</div>
+<div class="line">template &lt;typename U&gt; friend matrix&lt;U&gt; operator*(int coef, matrix&lt;U&gt;&amp; m);</div>
+<div class="line">matrix&lt;T&gt; operator^(int expo); // fast power algo</div>
+<div class="line">matrix&lt;T&gt;&amp; operator*=(matrix&lt;T&gt;&amp; other);</div>
+<div class="line">matrix&lt;T&gt;&amp; operator*=(T coef);</div>
+<div class="line">matrix&lt;T&gt;&amp; operator+=(matrix&lt;T&gt;&amp; other);</div>
+<div class="line">matrix&lt;T&gt;&amp; operator-=(matrix&lt;T&gt;&amp; other);</div>
+<div class="line">matrix&lt;T&gt; multiply_elements(matrix&lt;T&gt;&amp; other);</div>
+<div class="line"> </div>
+<div class="line">static matrix&lt;T&gt; merge_matrix(matrix&lt;T&gt;&amp; C11, matrix&lt;T&gt;&amp; C12, matrix&lt;T&gt;&amp; C21, matrix&lt;T&gt;&amp; C22);</div>
+<div class="line"> </div>
+<div class="line">int get_nrows();</div>
+<div class="line">int get_ncols();</div>
+<div class="line">int* shape();</div>
+<div class="line">void print_shape();</div>
+<div class="line">bool shape_equals(matrix&lt;T&gt;&amp; other);</div>
+<div class="line"> </div>
+<div class="line">matrix();</div>
+<div class="line">matrix(int nrows, int ncols);</div>
+<div class="line">matrix(int nrows, int ncols, T fill);</div>
+<div class="line">matrix&lt;T&gt; copy(); // hard copy</div>
+<div class="line"> </div>
+<div class="line">static matrix&lt;T&gt; create_row_vec(int ncols, T fill);</div>
+<div class="line">static matrix&lt;T&gt; create_col_vec(int nrows, T fill);</div>
+<div class="line">static matrix&lt;T&gt; create_diagonal(int nrows, T fill);</div>
+<div class="line">static matrix&lt;T&gt; read_matrix(const char* file_name);</div>
+<div class="line">void print(const char* file_name);</div>
+<div class="line">void print();</div>
+</div><!-- fragment --><p >Check their description and usage in the <a href="https://xdzhelheim.github.io/CS205_C_CPP_Lab/classmatrix.html">document</a>.</p>
+<h1><a class="anchor" id="autotoc_md16"></a>
+3 x86 and ARM</h1>
+<h1><a class="anchor" id="autotoc_md17"></a>
+4 Conclusion</h1>
+<p >In this project, I learnt to design a complete class in C++, especially overriding the operators.</p>
+<p >I learned how to manage memory when using soft copy. And a new concept ROI and its manipulations.</p>
+<p >In addition, I learned how to use <code>doxygen</code> to generate docs for C++ source codes.</p>
+<p >And I compared the performance of x86 and ARM ISA. Thus, I had a better understanding on different architectures. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

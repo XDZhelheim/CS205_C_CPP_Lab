@@ -84,16 +84,22 @@ inline matrix<T>::matrix(const matrix<T>& other) {
 
 template <typename T>
 inline matrix<T>::~matrix() {
+    // keep the fields for submatrix to use
     // this->nrows = 0;
     // this->ncols = 0;
 
     *(this->ref_count) -= 1;
     if (*(this->ref_count) == 0 && this->data != nullptr) {
-        delete[] this->data;
+        if (this->parent_matrix == nullptr) {
+            delete[] this->data;
+        } else {  // it is a submatrix
+            delete[] this->parent_matrix->data;
+        }
         delete this->ref_count;
     }
-    this->data = nullptr;
-    this->ref_count = nullptr;
+
+    // this->data = nullptr;
+    // this->ref_count = nullptr;
 }
 
 template <typename T>
@@ -533,6 +539,8 @@ void matrix<T>::adjust_ROI(int row_start, int row_end, int col_start, int col_en
         exit(EXIT_FAILURE);
     }
 
+    this->nrows = row_end - row_start;
+    this->ncols = col_end - col_start;
     this->data = this->parent_matrix->data + row_start * this->parent_matrix->ncols + col_start;
 }
 
