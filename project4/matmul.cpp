@@ -15,14 +15,14 @@ int main(int argc, char const* argv[]) {
     matrix<double> m2 = matrix<double>::read_matrix(argv[2]);
 
     end = clock();
-    printf("Read file time: %fs\n", (double)(end - start) / CLOCKS_PER_SEC);
+    // printf("Read file time: %fs\n", (double)(end - start) / CLOCKS_PER_SEC);
 
     start = clock();
 
     matrix<double> res = m1 * m2;
 
     end = clock();
-    printf("Multiplication time: %fs\n", (double)(end - start) / CLOCKS_PER_SEC);
+    // printf("Multiplication time: %fs\n", (double)(end - start) / CLOCKS_PER_SEC);
 
     res.print(argv[3]);
     return 0;

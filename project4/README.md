@@ -25,7 +25,7 @@ This project is to design a class for matrices.
 3. Do not use memory hard copy if a matrix object is assigned to another.
 4. Implement some frequently used operators.
 5. Implement region of interest (ROI) to avoid memory hard copy.
-6. Test the program on X86 and ARM platforms, and describe the differences.
+6. Test the program on X86 and Arm platforms, and describe the differences.
 
 ### 1.2 Development Environment
 
@@ -40,7 +40,7 @@ This project is to design a class for matrices.
 
   * C++ standard: `c++11`
 
-* ARM64
+* Arm64
 
   * `macOS 12.0.1 21A559 arm64`
   * Darwin Kernel Version `21.1.0`
@@ -348,9 +348,175 @@ void print();
 
 Check their description and usage in the [document](https://xdzhelheim.github.io/CS205_C_CPP_Lab/classmatrix.html).
 
-## 3 x86 and ARM
+## 3 x86 and Arm
+
+### 3.1 Metrics
+
+Speaking to differences between x86 and Arm, the first thought in my head is instructions. x86 is a CISC instruction set and Arm is a RISC instruction set. So to compare them, the most obvious metrics is the number of instructions executed. We expect that Arm will execute much more instructions than x86 on the same program.
+
+However, counting the number of instructions need CPU and operating system's API support. Inside most CPU there is a PMU (Performance Monitoring Unit) that counts information on machine-level. Luckily Linux  has a tool `perf` to access PMU.
+
+The command is `perf stat <program>`. However, I tried it on three different Linux computers (my PC, my lab's server, Huawei's server) and it just did not work.
+
+```bash
+[dongzheng@ecs001-0021-0032 ~]$ perf stat -v ls
+Using CPUID 0x00000000480fd010
+Warning:
+cycles event is not supported by the kernel.
+Warning:
+instructions event is not supported by the kernel.
+Warning:
+branches event is not supported by the kernel.
+Warning:
+branch-misses event is not supported by the kernel.
+htop-2.2.0-8.fc32.aarch64.rpm  neofetch-7.1.0-1.5.noarch.rpm  openEuler_aarch64.repo  test.cpp
+task-clock: 740580 740580 740580
+context-switches: 0 740580 740580
+cpu-migrations: 0 740580 740580
+page-faults: 61 740580 740580
+failed to read counter cycles
+failed to read counter instructions
+failed to read counter branches
+failed to read counter branch-misses
+
+ Performance counter stats for 'ls':
+
+              0.74 msec task-clock                #    0.797 CPUs utilized
+                 0      context-switches          #    0.000 K/sec
+                 0      cpu-migrations            #    0.000 K/sec
+                61      page-faults               #    0.082 M/sec
+   <not supported>      cycles
+   <not supported>      instructions
+   <not supported>      branches
+   <not supported>      branch-misses
+
+       0.000929716 seconds time elapsed
+
+       0.000965000 seconds user
+       0.000000000 seconds sys
+```
+
+It all showed `<not supported>` on these three different Linux systems, which is very weird. Then I spent all day finding solutions on foreign websites, and I failed. All the configs are right and god knows why it doesn't work.
+
+```bash
+[dongzheng@ecs001-0021-0032 ~]$ cat /usr/src/kernels/4.19.90-2003.4.0.0036.oe1.aarch64/.config | grep CONFIG_HW_PERF_EVENTS
+CONFIG_HW_PERF_EVENTS=y
+[dongzheng@ecs001-0021-0032 ~]$ cat /usr/src/kernels/4.19.90-2003.4.0.0036.oe1.aarch64/.config | grep CONFIG_PERF_EVENTS
+CONFIG_PERF_EVENTS=y
+```
+
+Then I started to read Intel and Arm's PMU manual to get information about perf events.
+
+In *Intel(R) 64 and IA-32 Architectures Software Developer's Manual Volume 3B*, section 19.1, there is a table:
+
+![](./images/intel_perf.png)
+
+To get these counters, use `perf stat -e r<umask><event#> <program>`. And I found the cycles counter (0x003c) work.
+
+On my lab's server (Intel Xeon Gold 6240)
+
+```bash
+undergrad1@s001:~/dz$ perf stat -e r003c ls
+LightGBM.tar.gz  log  supersegment
+
+ Performance counter stats for 'ls':
+
+         1,742,296      r003c
+
+       0.000919820 seconds time elapsed
+
+```
+
+So I found a way to count CPU cycles.
+
+And for Arm's CPU, look up its ISA first.
+
+On Arm server:
+
+```bash
+[dongzheng@ecs001-0021-0032 ~]$ cat /proc/cpuinfo
+processor       : 0
+BogoMIPS        : 200.00
+Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma dcpop asimddp asimdfhm
+CPU implementer : 0x48
+CPU architecture: 8
+CPU variant     : 0x1
+CPU part        : 0xd01
+CPU revision    : 0
+
+...
+```
+
+Referring to `MIDR` register. The CPU of this server is HiSilicon's Kunpeng-920 r1p0, ARMv8.
+
+Then find an ARMv8 architecture CPU on Arm's document, eg. Cortex-A53. In PMU events section, there is another [table](https://developer.arm.com/documentation/ddi0500/j/Performance-Monitor-Unit/Events?lang=en):
+
+![](./images/arm_perf.png)
+
+The event number of CPU cycles is `0x11`.
+
+Therefore, to count CPU cycles, use `perf stat -e r11 <program>`, and it did work.
+
+```bash
+[dongzheng@ecs001-0021-0032 ~]$ perf stat -v -e r11 ls
+Using CPUID 0x00000000480fd010
+htop-2.2.0-8.fc32.aarch64.rpm  neofetch-7.1.0-1.5.noarch.rpm  openEuler_aarch64.repo  test.cpp
+r11: 2147483647 728390 728390
+
+ Performance counter stats for 'ls':
+
+     2,147,483,647      r11
+
+       0.000918686 seconds time elapsed
+
+       0.000957000 seconds user
+       0.000000000 seconds sys
+
+```
+
+Finally, I found a way to compare CPU cycles.
+
+### 3.2 Test Platform
+
+x86_64:
+
+![](./images/intelneofetch.png)
+
+Arm64:
+
+![](./images/armneofetch.png)
+
+### 3.3 Dataset & Test Cases
+
+Use the same dataset as **project3**, the dimension of matrices are 32, 64, 128, 256, 512, 1024 and 2048.
+
+The test program is still matrix multiplication, compiled with `set(CMAKE_BUILD_TYPE "Release")` to get maximum compiler optimization.
+
+For each dimension, run it for 10 times and calculate average to improve accuracy.
+
+### 3.4 Comparison On Matrix Multiplication
 
 
+
+### 3.5 References
+
+[How can I get the number of instructions executed by a program?](https://stackoverflow.com/questions/31073882/how-can-i-get-the-number-of-instructions-executed-by-a-program)
+
+[why does perf stat show "stalled-cycles-backend" as \<not supported\>?](https://stackoverflow.com/questions/22712956/why-does-perf-stat-show-stalled-cycles-backend-as-not-supported)
+
+[Why can't I find hardware cache event in my perf list?](https://unix.stackexchange.com/questions/273893/why-cant-i-find-hardware-cache-event-in-my-perf-list)
+
+[Perf Wiki Tutorial](https://perf.wiki.kernel.org/index.php/Tutorial)
+
+[Intel(R) 64 and IA-32 Architectures Software Developer's Manual Volume 3B: System Programming Guide](http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf)
+
+[Using the perf utility on Arm](https://falstaff.agner.ch/2015/10/26/using-the-perf-utility-on-arm/)
+
+[PERF tutorial: Counting hardware performance events](https://sandsoftwaresound.net/perf/perf-tut-count-hw-events/)
+
+[Arm CPU Vendor 及 Part ID 映射关系](https://kunpengcompute.github.io/2020/04/03/arm-cpu-vendor-ji-part-id-ying-she-guan-xi-chi-xu-geng-xin/)
+
+[Arm Cortex-A53 MPCore Processor Technical Reference Manual](https://developer.arm.com/documentation/ddi0500/j/Performance-Monitor-Unit/Events?lang=en)
 
 ## 4 Conclusion
 
@@ -360,5 +526,5 @@ I learned how to manage memory when using soft copy. And a new concept ROI and i
 
 In addition, I learned how to use `doxygen` to generate docs for C++ source codes.
 
-And I compared the performance of x86 and ARM ISA. Thus, I had a better understanding on different architectures.
+And I compared the performance of x86 and Arm ISA. Thus, I had a better understanding on different architectures.
 

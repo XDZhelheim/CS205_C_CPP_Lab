@@ -75,7 +75,7 @@ template <typename T>
 inline matrix<T>::matrix(const matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
-    this->parent_matrix = nullptr;
+    this->parent_matrix = other.parent_matrix;
 
     this->data = other.data;
     this->ref_count = other.ref_count;
@@ -106,6 +106,7 @@ template <typename T>
 inline matrix<T>& matrix<T>::operator=(const matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
+    this->parent_matrix = other.parent_matrix;
 
     *(this->ref_count) -= 1;
     if (*(this->ref_count) == 0 && this->data != nullptr) {
