@@ -43,8 +43,14 @@ var NAVTREE =
           [ "2.4.2 Other Functions", "md__r_e_a_d_m_e.html#autotoc_md15", null ]
         ] ]
       ] ],
-      [ "3 x86 and ARM", "md__r_e_a_d_m_e.html#autotoc_md16", null ],
-      [ "4 Conclusion", "md__r_e_a_d_m_e.html#autotoc_md17", null ]
+      [ "3 x86 and Arm", "md__r_e_a_d_m_e.html#autotoc_md16", [
+        [ "3.1 Metrics: CPU Cycles", "md__r_e_a_d_m_e.html#autotoc_md17", null ],
+        [ "3.2 Test Platform", "md__r_e_a_d_m_e.html#autotoc_md18", null ],
+        [ "3.3 Dataset & Test Cases", "md__r_e_a_d_m_e.html#autotoc_md19", null ],
+        [ "3.4 Comparison On Matrix Multiplication", "md__r_e_a_d_m_e.html#autotoc_md20", null ],
+        [ "3.5 References", "md__r_e_a_d_m_e.html#autotoc_md21", null ]
+      ] ],
+      [ "4 Conclusion", "md__r_e_a_d_m_e.html#autotoc_md22", null ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],

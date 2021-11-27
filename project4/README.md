@@ -144,7 +144,7 @@ template <typename T>
 inline matrix<T>::matrix(const matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
-    this->parent_matrix = nullptr;
+    this->parent_matrix = other.parent_matrix;
 
     this->data = other.data;
     this->ref_count = other.ref_count;
@@ -159,6 +159,7 @@ template <typename T>
 inline matrix<T>& matrix<T>::operator=(const matrix<T>& other) {
     this->nrows = other.nrows;
     this->ncols = other.ncols;
+    this->parent_matrix = other.parent_matrix;
 
     *(this->ref_count) -= 1;
     if (*(this->ref_count) == 0 && this->data != nullptr) {
@@ -350,7 +351,7 @@ Check their description and usage in the [document](https://xdzhelheim.github.io
 
 ## 3 x86 and Arm
 
-### 3.1 Metrics
+### 3.1 Metrics: CPU Cycles
 
 Speaking to differences between x86 and Arm, the first thought in my head is instructions. x86 is a CISC instruction set and Arm is a RISC instruction set. So to compare them, the most obvious metrics is the number of instructions executed. We expect that Arm will execute much more instructions than x86 on the same program.
 
@@ -494,9 +495,33 @@ The test program is still matrix multiplication, compiled with `set(CMAKE_BUILD_
 
 For each dimension, run it for 10 times and calculate average to improve accuracy.
 
+The command (on x86) I use is:
+
+```bash
+perf stat -e r003c -x, -r 10 ../matmul.out ../data/mat-A-{dim}.txt ../data/mat-B-{dim}.txt ./out/out-{dim}.txt 2>>res_x86.csv
+```
+
 ### 3.4 Comparison On Matrix Multiplication
 
+Here is the result:
 
+![](./images/cycles.png)
+
+Raw data:
+
+| Dim  | x86            | Arm             |
+| :--: | :------------- | :-------------- |
+|  32  | 5,437,450      | 6,442,450,941   |
+|  64  | 15,888,681     | 7,516,192,764   |
+| 128  | 54,962,123     | 14,173,392,070  |
+| 256  | 248,184,298    | 18,468,359,364  |
+| 512  | 1,177,740,654  | 25,125,558,670  |
+| 1024 | 5,620,732,185  | 33,500,744,893  |
+| 2048 | 29,277,503,823 | 124,554,051,526 |
+
+From the result, we can see that Arm used much more CPU cycles, about $10^1$ larger than x86's, as we expected.
+
+From my test results, on same programs, on average, Arm uses **6.3126** times of x86's CPU cycles (sum of arm / sum of x86). Which means Arm is short for complex programs.
 
 ### 3.5 References
 
@@ -526,5 +551,5 @@ I learned how to manage memory when using soft copy. And a new concept ROI and i
 
 In addition, I learned how to use `doxygen` to generate docs for C++ source codes.
 
-And I compared the performance of x86 and Arm ISA. Thus, I had a better understanding on different architectures.
+And I compared the performance of x86 and Arm ISA. Thus, I had a better understanding on different architectures. And I need an OS engineer to fix these perf events and a doctor to fix me.
 

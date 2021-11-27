@@ -103,8 +103,14 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 </li>
 </ul>
 </li>
-<li class="level1"><a href="#autotoc_md16">3 x86 and ARM</a></li>
-<li class="level1"><a href="#autotoc_md17">4 Conclusion</a></li>
+<li class="level1"><a href="#autotoc_md16">3 x86 and Arm</a><ul><li class="level2"><a href="#autotoc_md17">3.1 Metrics: CPU Cycles</a></li>
+<li class="level2"><a href="#autotoc_md18">3.2 Test Platform</a></li>
+<li class="level2"><a href="#autotoc_md19">3.3 Dataset &amp; Test Cases</a></li>
+<li class="level2"><a href="#autotoc_md20">3.4 Comparison On Matrix Multiplication</a></li>
+<li class="level2"><a href="#autotoc_md21">3.5 References</a></li>
+</ul>
+</li>
+<li class="level1"><a href="#autotoc_md22">4 Conclusion</a></li>
 </ul>
 </div>
 <div class="textblock"><p >11812804 董正</p>
@@ -113,7 +119,7 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <h1><a class="anchor" id="autotoc_md3"></a>
 1 Introduction</h1>
 <p >The documentation of class <code>matrix</code> is hosted on <a href="https://xdzhelheim.github.io/CS205_C_CPP_Lab/classmatrix.html">my GitHub</a>.</p>
-<p ><img src="../project4/images/doc.png" alt="" class="inline"/></p>
+<p ><img src="./images/doc.png" alt="" class="inline"/></p>
 <p >Alternatively, view this report online <a href="https://xdzhelheim.github.io/CS205_C_CPP_Lab/md__r_e_a_d_m_e.html">here</a>.</p>
 <h2><a class="anchor" id="autotoc_md4"></a>
 1.1 Project Description</h2>
@@ -124,7 +130,7 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <li>Do not use memory hard copy if a matrix object is assigned to another.</li>
 <li>Implement some frequently used operators.</li>
 <li>Implement region of interest (ROI) to avoid memory hard copy.</li>
-<li>Test the program on X86 and ARM platforms, and describe the differences.</li>
+<li>Test the program on X86 and Arm platforms, and describe the differences.</li>
 </ol>
 <h2><a class="anchor" id="autotoc_md5"></a>
 1.2 Development Environment</h2>
@@ -137,7 +143,7 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <li>C++ standard: <code>c++11</code></li>
 </ul>
 </li>
-<li>ARM64<ul>
+<li>Arm64<ul>
 <li><code>macOS 12.0.1 21A559 arm64</code></li>
 <li>Darwin Kernel Version <code>21.1.0</code></li>
 <li>Apple M1 Pro (10-cores)</li>
@@ -185,10 +191,10 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <p >A solution is to override destructor and do not free <code>data</code>. But it will cause memory leak.</p>
 <p >To solve this, I referenced <code>cv::Mat</code> and added a field <code>int* ref_count</code>. It serves like a global integer for each allocated array.</p>
 <p >The idea is described in the following picture:</p>
-<p ><img src="../project4/images/ref_count.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p ><img src="./images/ref_count.svg" alt="" style="pointer-events: none;" class="inline"/></p>
 <p >When destructing a matrix, just decrease the integer that <code>ref_count</code> points to.</p>
 <p >Example: delete <code>m3, m4</code>.</p>
-<p ><img src="../project4/images/ref_count-1.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p ><img src="./images/ref_count-1.svg" alt="" style="pointer-events: none;" class="inline"/></p>
 <p >When <code>ref_count</code> decreases to 0, the array will be finally freed.</p>
 <p >Therefore, the destructor is:</p>
 <div class="fragment"><div class="line"> {c++}</div>
@@ -206,7 +212,7 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <div class="line">inline matrix&lt;T&gt;::matrix(const matrix&lt;T&gt;&amp; other) {</div>
 <div class="line">    this-&gt;nrows = other.nrows;</div>
 <div class="line">    this-&gt;ncols = other.ncols;</div>
-<div class="line">    this-&gt;parent_matrix = nullptr;</div>
+<div class="line">    this-&gt;parent_matrix = other.parent_matrix;</div>
 <div class="line"> </div>
 <div class="line">    this-&gt;data = other.data;</div>
 <div class="line">    this-&gt;ref_count = other.ref_count;</div>
@@ -218,6 +224,7 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <div class="line">inline matrix&lt;T&gt;&amp; matrix&lt;T&gt;::operator=(const matrix&lt;T&gt;&amp; other) {</div>
 <div class="line">    this-&gt;nrows = other.nrows;</div>
 <div class="line">    this-&gt;ncols = other.ncols;</div>
+<div class="line">    this-&gt;parent_matrix = other.parent_matrix;</div>
 <div class="line"> </div>
 <div class="line">    *(this-&gt;ref_count) -= 1;</div>
 <div class="line">    if (*(this-&gt;ref_count) == 0 &amp;&amp; this-&gt;data != nullptr) {</div>
@@ -237,16 +244,16 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <p >To use ROI correctly, we need to know the shape of its parent matrix's size. Because when we get the <code>[i][j]</code> position element, we need to know the columns of its parent matrix in order to translate <code>i</code> and <code>j</code> to the correct position in the whole array.</p>
 <p >i.e. <code>sub[i][j]==sub.data[i * parent.ncols + j]</code>.</p>
 <p >So the design is very clear. Use a <code>parent_matrix</code> pointer to store its parent:</p>
-<p ><img src="../project4/images/ROI.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p ><img src="./images/ROI.svg" alt="" style="pointer-events: none;" class="inline"/></p>
 <p >However, here comes two problems with this design.</p>
 <h3><a class="anchor" id="autotoc_md10"></a>
 2.3.1 Multi-level Submatrix</h3>
 <p >The first is, multi-level submatrix.</p>
 <p >One choice is to concatenate them like a linked-list:</p>
-<p ><img src="../project4/images/ROI-ll.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p ><img src="./images/ROI-ll.svg" alt="" style="pointer-events: none;" class="inline"/></p>
 <p >It is unacceptable because <code>sub_sub_m1[i][j]==sub_sub_m1.data[i * sub_sub_m1-&gt;parent_matrix-&gt;ncols + j]==sub_sub_m1.data[i * sub_m1.ncols + j]</code> and it is wrong.</p>
 <p >Therefore, we must let all the submatrices point to the root matrix.</p>
-<p ><img src="../project4/images/ROI-uf.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p ><img src="./images/ROI-uf.svg" alt="" style="pointer-events: none;" class="inline"/></p>
 <p >Thus, the submatrix construction function is:</p>
 <div class="fragment"><div class="line"> {c++}</div>
 <div class="line">template &lt;typename T&gt;</div>
@@ -271,7 +278,7 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md11"></a>
 2.3.2 Submatrix Deletion</h3>
 <p >The second problem is the case that delete parent matrix before delete all submatrices.</p>
-<p ><img src="../project4/images/ROI-delete.svg" alt="" style="pointer-events: none;" class="inline"/></p>
+<p ><img src="./images/ROI-delete.svg" alt="" style="pointer-events: none;" class="inline"/></p>
 <p >When delete <code>sub_m1</code>, we should delete <code>m1.data</code>, not <code>sub_m1.data</code> because it is not the head address.</p>
 <p >Therefore, <code>~matrix()</code> should be modified:</p>
 <div class="fragment"><div class="line"> {c++}</div>
@@ -376,13 +383,153 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 <div class="line">void print();</div>
 </div><!-- fragment --><p >Check their description and usage in the <a href="https://xdzhelheim.github.io/CS205_C_CPP_Lab/classmatrix.html">document</a>.</p>
 <h1><a class="anchor" id="autotoc_md16"></a>
-3 x86 and ARM</h1>
-<h1><a class="anchor" id="autotoc_md17"></a>
+3 x86 and Arm</h1>
+<h2><a class="anchor" id="autotoc_md17"></a>
+3.1 Metrics: CPU Cycles</h2>
+<p >Speaking to differences between x86 and Arm, the first thought in my head is instructions. x86 is a CISC instruction set and Arm is a RISC instruction set. So to compare them, the most obvious metrics is the number of instructions executed. We expect that Arm will execute much more instructions than x86 on the same program.</p>
+<p >However, counting the number of instructions need CPU and operating system's API support. Inside most CPU there is a PMU (Performance Monitoring Unit) that counts information on machine-level. Luckily Linux has a tool <code>perf</code> to access PMU.</p>
+<p >The command is <code>perf stat &lt;program&gt;</code>. However, I tried it on three different Linux computers (my PC, my lab's server, Huawei's server) and it just did not work.</p>
+<div class="fragment"><div class="line">[dongzheng@ecs001-0021-0032 ~]$ perf stat -v ls</div>
+<div class="line">Using CPUID 0x00000000480fd010</div>
+<div class="line">Warning:</div>
+<div class="line">cycles event is not supported by the kernel.</div>
+<div class="line">Warning:</div>
+<div class="line">instructions event is not supported by the kernel.</div>
+<div class="line">Warning:</div>
+<div class="line">branches event is not supported by the kernel.</div>
+<div class="line">Warning:</div>
+<div class="line">branch-misses event is not supported by the kernel.</div>
+<div class="line">htop-2.2.0-8.fc32.aarch64.rpm  neofetch-7.1.0-1.5.noarch.rpm  openEuler_aarch64.repo  test.cpp</div>
+<div class="line">task-clock: 740580 740580 740580</div>
+<div class="line">context-switches: 0 740580 740580</div>
+<div class="line">cpu-migrations: 0 740580 740580</div>
+<div class="line">page-faults: 61 740580 740580</div>
+<div class="line">failed to read counter cycles</div>
+<div class="line">failed to read counter instructions</div>
+<div class="line">failed to read counter branches</div>
+<div class="line">failed to read counter branch-misses</div>
+<div class="line"> </div>
+<div class="line"> Performance counter stats for &#39;ls&#39;:</div>
+<div class="line"> </div>
+<div class="line">              0.74 msec task-clock                #    0.797 CPUs utilized</div>
+<div class="line">                 0      context-switches          #    0.000 K/sec</div>
+<div class="line">                 0      cpu-migrations            #    0.000 K/sec</div>
+<div class="line">                61      page-faults               #    0.082 M/sec</div>
+<div class="line">   &lt;not supported&gt;      cycles</div>
+<div class="line">   &lt;not supported&gt;      instructions</div>
+<div class="line">   &lt;not supported&gt;      branches</div>
+<div class="line">   &lt;not supported&gt;      branch-misses</div>
+<div class="line"> </div>
+<div class="line">       0.000929716 seconds time elapsed</div>
+<div class="line"> </div>
+<div class="line">       0.000965000 seconds user</div>
+<div class="line">       0.000000000 seconds sys</div>
+</div><!-- fragment --><p >It all showed <code>&lt;not supported&gt;</code> on these three different Linux systems, which is very weird. Then I spent all day finding solutions on foreign websites, and I failed. All the configs are right and god knows why it doesn't work.</p>
+<div class="fragment"><div class="line">[dongzheng@ecs001-0021-0032 ~]$ cat /usr/src/kernels/4.19.90-2003.4.0.0036.oe1.aarch64/.config | grep CONFIG_HW_PERF_EVENTS</div>
+<div class="line">CONFIG_HW_PERF_EVENTS=y</div>
+<div class="line">[dongzheng@ecs001-0021-0032 ~]$ cat /usr/src/kernels/4.19.90-2003.4.0.0036.oe1.aarch64/.config | grep CONFIG_PERF_EVENTS</div>
+<div class="line">CONFIG_PERF_EVENTS=y</div>
+</div><!-- fragment --><p >Then I started to read Intel and Arm's PMU manual to get information about perf events.</p>
+<p >In <em>Intel(R) 64 and IA-32 Architectures Software Developer's Manual Volume 3B</em>, section 19.1, there is a table:</p>
+<p ><img src="./images/intel_perf.png" alt="" class="inline"/></p>
+<p >To get these counters, use <code>perf stat -e r&lt;umask&gt;&lt;event#&gt; &lt;program&gt;</code>. And I found the cycles counter (0x003c) work.</p>
+<p >On my lab's server (Intel Xeon Gold 6240)</p>
+<div class="fragment"><div class="line">undergrad1@s001:~/dz$ perf stat -e r003c ls</div>
+<div class="line">LightGBM.tar.gz  log  supersegment</div>
+<div class="line"> </div>
+<div class="line"> Performance counter stats for &#39;ls&#39;:</div>
+<div class="line"> </div>
+<div class="line">         1,742,296      r003c</div>
+<div class="line"> </div>
+<div class="line">       0.000919820 seconds time elapsed</div>
+</div><!-- fragment --><p >So I found a way to count CPU cycles.</p>
+<p >And for Arm's CPU, look up its ISA first.</p>
+<p >On Arm server:</p>
+<div class="fragment"><div class="line">[dongzheng@ecs001-0021-0032 ~]$ cat /proc/cpuinfo</div>
+<div class="line">processor       : 0</div>
+<div class="line">BogoMIPS        : 200.00</div>
+<div class="line">Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma dcpop asimddp asimdfhm</div>
+<div class="line">CPU implementer : 0x48</div>
+<div class="line">CPU architecture: 8</div>
+<div class="line">CPU variant     : 0x1</div>
+<div class="line">CPU part        : 0xd01</div>
+<div class="line">CPU revision    : 0</div>
+<div class="line"> </div>
+<div class="line">...</div>
+</div><!-- fragment --><p >Referring to <code>MIDR</code> register. The CPU of this server is HiSilicon's Kunpeng-920 r1p0, ARMv8.</p>
+<p >Then find an ARMv8 architecture CPU on Arm's document, eg. Cortex-A53. In PMU events section, there is another <a href="https://developer.arm.com/documentation/ddi0500/j/Performance-Monitor-Unit/Events?lang=en">table</a>:</p>
+<p ><img src="./images/arm_perf.png" alt="" class="inline"/></p>
+<p >The event number of CPU cycles is <code>0x11</code>.</p>
+<p >Therefore, to count CPU cycles, use <code>perf stat -e r11 &lt;program&gt;</code>, and it did work.</p>
+<div class="fragment"><div class="line">[dongzheng@ecs001-0021-0032 ~]$ perf stat -v -e r11 ls</div>
+<div class="line">Using CPUID 0x00000000480fd010</div>
+<div class="line">htop-2.2.0-8.fc32.aarch64.rpm  neofetch-7.1.0-1.5.noarch.rpm  openEuler_aarch64.repo  test.cpp</div>
+<div class="line">r11: 2147483647 728390 728390</div>
+<div class="line"> </div>
+<div class="line"> Performance counter stats for &#39;ls&#39;:</div>
+<div class="line"> </div>
+<div class="line">     2,147,483,647      r11</div>
+<div class="line"> </div>
+<div class="line">       0.000918686 seconds time elapsed</div>
+<div class="line"> </div>
+<div class="line">       0.000957000 seconds user</div>
+<div class="line">       0.000000000 seconds sys</div>
+</div><!-- fragment --><p >Finally, I found a way to compare CPU cycles.</p>
+<h2><a class="anchor" id="autotoc_md18"></a>
+3.2 Test Platform</h2>
+<p >x86_64:</p>
+<p ><img src="./images/intelneofetch.png" alt="" class="inline"/></p>
+<p >Arm64:</p>
+<p ><img src="./images/armneofetch.png" alt="" class="inline"/></p>
+<h2><a class="anchor" id="autotoc_md19"></a>
+3.3 Dataset &amp; Test Cases</h2>
+<p >Use the same dataset as <b>project3</b>, the dimension of matrices are 32, 64, 128, 256, 512, 1024 and 2048.</p>
+<p >The test program is still matrix multiplication, compiled with <code>set(CMAKE_BUILD_TYPE "Release")</code> to get maximum compiler optimization.</p>
+<p >For each dimension, run it for 10 times and calculate average to improve accuracy.</p>
+<p >The command (on x86) I use is:</p>
+<div class="fragment"><div class="line">perf stat -e r003c -x, -r 10 ../matmul.out ../data/mat-A-{dim}.txt ../data/mat-B-{dim}.txt ./out/out-{dim}.txt 2&gt;&gt;res_x86.csv</div>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md20"></a>
+3.4 Comparison On Matrix Multiplication</h2>
+<p >Here is the result:</p>
+<p ><img src="./images/cycles.png" alt="" class="inline"/></p>
+<p >Raw data:</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadCenter">Dim   </th><th class="markdownTableHeadLeft">x86   </th><th class="markdownTableHeadLeft">Arm    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">32   </td><td class="markdownTableBodyLeft">5,437,450   </td><td class="markdownTableBodyLeft">6,442,450,941    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">64   </td><td class="markdownTableBodyLeft">15,888,681   </td><td class="markdownTableBodyLeft">7,516,192,764    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">128   </td><td class="markdownTableBodyLeft">54,962,123   </td><td class="markdownTableBodyLeft">14,173,392,070    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">256   </td><td class="markdownTableBodyLeft">248,184,298   </td><td class="markdownTableBodyLeft">18,468,359,364    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">512   </td><td class="markdownTableBodyLeft">1,177,740,654   </td><td class="markdownTableBodyLeft">25,125,558,670    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">1024   </td><td class="markdownTableBodyLeft">5,620,732,185   </td><td class="markdownTableBodyLeft">33,500,744,893    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">2048   </td><td class="markdownTableBodyLeft">29,277,503,823   </td><td class="markdownTableBodyLeft">124,554,051,526   </td></tr>
+</table>
+<p >From the result, we can see that Arm used much more CPU cycles, about $10^1$ larger than x86's, as we expected.</p>
+<p >From my test results, on same programs, on average, Arm uses <b>6.3126</b> times of x86's CPU cycles (sum of arm / sum of x86). Which means Arm is short for complex programs.</p>
+<h2><a class="anchor" id="autotoc_md21"></a>
+3.5 References</h2>
+<p ><a href="https://stackoverflow.com/questions/31073882/how-can-i-get-the-number-of-instructions-executed-by-a-program">How can I get the number of instructions executed by a program?</a></p>
+<p ><a href="https://stackoverflow.com/questions/22712956/why-does-perf-stat-show-stalled-cycles-backend-as-not-supported">why does perf stat show "stalled-cycles-backend" as &lt;not supported&gt;?</a></p>
+<p ><a href="https://unix.stackexchange.com/questions/273893/why-cant-i-find-hardware-cache-event-in-my-perf-list">Why can't I find hardware cache event in my perf list?</a></p>
+<p ><a href="https://perf.wiki.kernel.org/index.php/Tutorial">Perf Wiki Tutorial</a></p>
+<p ><a href="http://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf">Intel(R) 64 and IA-32 Architectures Software Developer's Manual Volume 3B: System Programming Guide</a></p>
+<p ><a href="https://falstaff.agner.ch/2015/10/26/using-the-perf-utility-on-arm/">Using the perf utility on Arm</a></p>
+<p ><a href="https://sandsoftwaresound.net/perf/perf-tut-count-hw-events/">PERF tutorial: Counting hardware performance events</a></p>
+<p ><a href="https://kunpengcompute.github.io/2020/04/03/arm-cpu-vendor-ji-part-id-ying-she-guan-xi-chi-xu-geng-xin/">Arm CPU Vendor 及 Part ID 映射关系</a></p>
+<p ><a href="https://developer.arm.com/documentation/ddi0500/j/Performance-Monitor-Unit/Events?lang=en">Arm Cortex-A53 MPCore Processor Technical Reference Manual</a></p>
+<h1><a class="anchor" id="autotoc_md22"></a>
 4 Conclusion</h1>
 <p >In this project, I learnt to design a complete class in C++, especially overriding the operators.</p>
 <p >I learned how to manage memory when using soft copy. And a new concept ROI and its manipulations.</p>
 <p >In addition, I learned how to use <code>doxygen</code> to generate docs for C++ source codes.</p>
-<p >And I compared the performance of x86 and ARM ISA. Thus, I had a better understanding on different architectures. </p>
+<p >And I compared the performance of x86 and Arm ISA. Thus, I had a better understanding on different architectures. And I need an OS engineer to fix these perf events and a doctor to fix me. </p>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->

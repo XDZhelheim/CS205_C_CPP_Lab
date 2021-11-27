@@ -5,7 +5,7 @@ if __name__ == "__main__":
 
     for dim in dims:
         os.system(
-            f"perf stat -e r11 -x, -r 10 ../matmul.out ../data/mat-A-{dim}.txt ../data/mat-B-{dim}.txt ./out/out-{dim}.txt 2>>res_x86.csv"
+            f"perf stat -e r11 -x, -r 10 ../matmul.out ../data/mat-A-{dim}.txt ../data/mat-B-{dim}.txt ./out/out-{dim}.txt 2>>res_arm.csv"
         )
 
         print(f"Finished {dim}")
