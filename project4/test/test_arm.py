@@ -36,10 +36,6 @@ if __name__ == "__main__":
     cycles_dict = {}
     
     for dim in dims:
-        A = np.loadtxt(f"../data/mat-A-{dim}.txt")
-        B = np.loadtxt(f"../data/mat-B-{dim}.txt")
-        C = np.matmul(A, B)
-
         out = os.popen(
             f"perf stat -e r11 -x, -r 10 ../matmul.out ../data/mat-A-{dim}.txt ../data/mat-B-{dim}.txt ./out/out-{dim}.txt"
         ).read()
