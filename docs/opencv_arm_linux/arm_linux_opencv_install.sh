@@ -6,6 +6,9 @@ test_file=~/test_arm_opencv
 
 cd ~
 
+echo 'Checking cmake...'
+sudo yum install cmake
+
 echo -e "\033[36m########################################"
 echo -e "#            Download Start            #"
 echo -e "########################################\033[0m"
@@ -81,7 +84,7 @@ echo '#include <opencv2/opencv.hpp>' >> "${test_file}.cpp"
 echo 'int main() { cv::Mat m = (cv::Mat_<int>(3, 3) << 1, 2, 3, 4, 5, 6, 7, 8, 9); std::cout<<m<<std::endl; cv::Mat img = cv::imread("./fake_file.jpg"); return 0; }' >> "${test_file}.cpp"
 g++ "${test_file}.cpp" -o "${test_file}.out" -lopencv_core -lopencv_highgui -lopencv_imgcodecs
 
-diff_res=$(diff <(echo -e '[1, 2, 3;\n 4, 5, 6;\n 7, 8, 9]') <(${test_file}.out))
+diff_res=$(diff <(echo -e '[1, 2, 3;\n 4, 5, 6;\n 7, 8, 9]') <(${test_file}.out 2>&1))
 if [[ -z "${diff_res}" ]]; then
     echo -e "\033[32m########################################"
     echo -e "#            Test Pass                 #"
