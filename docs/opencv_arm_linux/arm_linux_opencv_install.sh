@@ -49,7 +49,7 @@ fi
 
 sudo chmod -R 755 /usr/local/include/opencv4
 
-diff_res=$(diff <(echo '4.5.4') <(opencv_version))
+diff_res=$(diff <(echo ${cv_version}) <(opencv_version))
 if [[ -z "${diff_res}" ]]; then
     echo -e "\033[32m########################################"
     echo -e "#            Build Pass                #"
