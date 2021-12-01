@@ -13,10 +13,14 @@ echo -e "\033[36m########################################"
 echo -e "#            Download Start            #"
 echo -e "########################################\033[0m"
 
-if [ -f "${cv_version}.zip" ]; then
-    echo "Already downloaded ${cv_version}.zip"
+if [[ -n $(opencv_version) ]]; then
+    echo -e "\033[36mAlready installed.\033[0m"
 else
-    wget "https://github.com/opencv/opencv/archive/${cv_version}.zip"
+    if [ -f "${cv_version}.zip" ]; then
+        echo "Already downloaded ${cv_version}.zip"
+    else
+        wget "https://github.com/opencv/opencv/archive/${cv_version}.zip"
+    fi
 fi
 
 echo -e "\033[32m########################################"
@@ -25,26 +29,30 @@ echo -e "########################################\033[0m"
 
 echo -e "\033[36m########################################"
 echo -e "#            Build Start               #"
-echo -e "#            May cost 1h+ time         #"
+echo -e "#            May cost 40+ min          #"
 echo -e "########################################\033[0m"
 
-if [ -d "opencv-${cv_version}/" ]; then
-    rm -r "opencv-${cv_version}/"
-fi
+if [[ -n $(opencv_version) ]]; then
+    echo -e "\033[36mAlready installed.\033[0m"
+else
+    if [ -d "opencv-${cv_version}/" ]; then
+        rm -r "opencv-${cv_version}/"
+    fi
 
-unzip "${cv_version}.zip"
-cd "opencv-${cv_version}/"
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release -DOPENCV_GENERATE_PKGCONFIG=ON
-sudo make install -j2
+    unzip "${cv_version}.zip"
+    cd "opencv-${cv_version}/"
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DOPENCV_GENERATE_PKGCONFIG=ON
+    sudo make install -j2
+fi
 
 sudo chmod -R 755 /usr/local/include/opencv4
 
 diff_res=$(diff <(echo '4.5.4') <(opencv_version))
 if [[ -z "${diff_res}" ]]; then
     echo -e "\033[32m########################################"
-    echo -e "#            Build Pass                 #"
+    echo -e "#            Build Pass                #"
     echo -e "########################################\033[0m"
 else
     echo -e "\033[31m########################################"
@@ -63,12 +71,16 @@ if [ ! -f ${bashrc} ]; then
     touch ${bashrc}
 fi
 
-echo '# opencv envs' >> ${bashrc}
-echo 'export C_INCLUDE_PATH="/usr/local/include/opencv4:$C_INCLUDE_PATH"' >> ${bashrc}
-echo 'export CPLUS_INCLUDE_PATH="/usr/local/include/opencv4:$CPLUS_INCLUDE_PATH"' >> ${bashrc}
-echo 'export LIBRARY_PATH="/usr/local/lib64/:$LIBRARY_PATH"' >> ${bashrc}
-echo 'export LD_LIBRARY_PATH="/usr/local/lib64/:$LD_LIBRARY_PATH"' >> ${bashrc}
-source ${bashrc}
+if [[ -z "$(cat ${bashrc}) | grep /usr/local/include/opencv4" ]]; then
+    echo '# opencv envs' >> ${bashrc}
+    echo 'export C_INCLUDE_PATH="/usr/local/include/opencv4:$C_INCLUDE_PATH"' >> ${bashrc}
+    echo 'export CPLUS_INCLUDE_PATH="/usr/local/include/opencv4:$CPLUS_INCLUDE_PATH"' >> ${bashrc}
+    echo 'export LIBRARY_PATH="/usr/local/lib64/:$LIBRARY_PATH"' >> ${bashrc}
+    echo 'export LD_LIBRARY_PATH="/usr/local/lib64/:$LD_LIBRARY_PATH"' >> ${bashrc}
+    source ${bashrc}
+else
+    echo -e "\033[36mEnvironment already satisfied.\033[0m"
+fi
 
 echo -e "\033[32m########################################"
 echo -e "#            Envs Set                  #"
