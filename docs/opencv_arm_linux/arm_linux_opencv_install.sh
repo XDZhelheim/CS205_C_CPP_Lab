@@ -103,5 +103,3 @@ fi
 rm -f "${test_file}.cpp" "${test_file}.out"
 
 echo "----------Finished----------"
-
-diff <(cmake .. -DCMAKE_BUILD_TYPE=Release -DOPENCV_GENERATE_PKGCONFIG=ON) <(cmake .. -DCMAKE_BUILD_TYPE=Release)
