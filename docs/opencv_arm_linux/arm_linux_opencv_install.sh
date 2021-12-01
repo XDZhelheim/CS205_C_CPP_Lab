@@ -49,14 +49,13 @@ fi
 
 sudo chmod -R 755 /usr/local/include/opencv4
 
-diff_res=$(diff <(echo ${cv_version}) <(opencv_version))
-if [[ -z "${diff_res}" ]]; then
+if [[ -n $(opencv_version 2>/dev/null) ]]; then
     echo -e "\033[32m########################################"
     echo -e "#            Build Pass                #"
     echo -e "########################################\033[0m"
 else
     echo -e "\033[31m########################################"
-    echo -e "#            Build Fail                 #"
+    echo -e "#            Build Fail                #"
     echo -e "########################################\033[0m"
     exit 1
 fi
