@@ -13,8 +13,8 @@ echo -e "\033[36m########################################"
 echo -e "#            Download Start            #"
 echo -e "########################################\033[0m"
 
-if [[ -n $(opencv_version) ]]; then
-    echo -e "\033[36mAlready installed.\033[0m"
+if [[ -n $(opencv_version 2>/dev/null) ]]; then
+    echo -e "\033[33mAlready installed.\033[0m"
 else
     if [ -f "${cv_version}.zip" ]; then
         echo "Already downloaded ${cv_version}.zip"
@@ -32,8 +32,8 @@ echo -e "#            Build Start               #"
 echo -e "#            May cost 40+ min          #"
 echo -e "########################################\033[0m"
 
-if [[ -n $(opencv_version) ]]; then
-    echo -e "\033[36mAlready installed.\033[0m"
+if [[ -n $(opencv_version 2>/dev/null) ]]; then
+    echo -e "\033[33mAlready installed.\033[0m"
 else
     if [ -d "opencv-${cv_version}/" ]; then
         rm -r "opencv-${cv_version}/"
@@ -71,7 +71,7 @@ if [ ! -f ${bashrc} ]; then
     touch ${bashrc}
 fi
 
-if [[ -z "$(cat ${bashrc}) | grep /usr/local/include/opencv4" ]]; then
+if [[ -z "$(cat ${bashrc}) | grep /usr/local/lib64/" ]]; then
     echo '# opencv envs' >> ${bashrc}
     echo 'export C_INCLUDE_PATH="/usr/local/include/opencv4:$C_INCLUDE_PATH"' >> ${bashrc}
     echo 'export CPLUS_INCLUDE_PATH="/usr/local/include/opencv4:$CPLUS_INCLUDE_PATH"' >> ${bashrc}
@@ -79,7 +79,7 @@ if [[ -z "$(cat ${bashrc}) | grep /usr/local/include/opencv4" ]]; then
     echo 'export LD_LIBRARY_PATH="/usr/local/lib64/:$LD_LIBRARY_PATH"' >> ${bashrc}
     source ${bashrc}
 else
-    echo -e "\033[36mEnvironment already satisfied.\033[0m"
+    echo -e "\033[33mEnvironment already satisfied.\033[0m"
 fi
 
 echo -e "\033[32m########################################"
