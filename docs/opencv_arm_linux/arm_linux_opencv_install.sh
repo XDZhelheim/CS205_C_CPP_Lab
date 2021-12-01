@@ -28,11 +28,15 @@ echo -e "#            Build Start               #"
 echo -e "#            May cost 1h+ time         #"
 echo -e "########################################\033[0m"
 
+if [ -d "opencv-${cv_version}/" ]; then
+    rm -r "opencv-${cv_version}/"
+fi
+
 unzip "${cv_version}.zip"
 cd "opencv-${cv_version}/"
 mkdir build
 cd build
-cmake .. -D CMAKE_BUILD_TYPE=Release -D OPENCV_GENERATE_PKGCONFIG=ON
+cmake .. -DCMAKE_BUILD_TYPE=Release -DOPENCV_GENERATE_PKGCONFIG=ON
 sudo make install -j2
 
 sudo chmod -R 755 /usr/local/include/opencv4
@@ -96,6 +100,7 @@ else
 fi
 
 rm -f "${test_file}.cpp" "${test_file}.out"
-rm -f "${cv_version}.zip"
 
 echo "----------Finished----------"
+
+diff <(cmake .. -DCMAKE_BUILD_TYPE=Release -DOPENCV_GENERATE_PKGCONFIG=ON) <(cmake .. -DCMAKE_BUILD_TYPE=Release)
