@@ -77,10 +77,10 @@ if [[ -z "$(cat ${bashrc}) | grep /usr/local/lib64/" ]]; then
     echo 'export CPLUS_INCLUDE_PATH="/usr/local/include/opencv4:$CPLUS_INCLUDE_PATH"' >> ${bashrc}
     echo 'export LIBRARY_PATH="/usr/local/lib64/:$LIBRARY_PATH"' >> ${bashrc}
     echo 'export LD_LIBRARY_PATH="/usr/local/lib64/:$LD_LIBRARY_PATH"' >> ${bashrc}
-    source ${bashrc}
 else
     echo -e "\033[33mEnvironment already satisfied.\033[0m"
 fi
+source ${bashrc}
 
 echo -e "\033[32m########################################"
 echo -e "#            Envs Set                  #"
