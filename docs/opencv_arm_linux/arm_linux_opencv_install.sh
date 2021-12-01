@@ -7,7 +7,7 @@ test_file=~/test_arm_opencv
 cd ~
 
 echo 'Checking cmake...'
-sudo yum install cmake
+sudo yum install -y cmake
 
 echo -e "\033[36m########################################"
 echo -e "#            Download Start            #"
