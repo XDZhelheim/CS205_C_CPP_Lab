@@ -136,12 +136,11 @@ function set_pkg_config() {
     cd /usr/local/lib64
     if [ ! -d "pkgconfig" ]; then
         mkdir pkgconfig
-        chmod 700 pkgconfig
     fi
+    chmod 777 pkgconfig
     cd pkgconfig
     if [ ! -f "opencv4.pc" ]; then
         touch opencv4.pc
-        chmod 644 opencv4.pc
 
         echo '# Package Information for pkg-config' >> opencv4.pc
         echo 'prefix=/usr/local' >> opencv4.pc
@@ -151,12 +150,13 @@ function set_pkg_config() {
         echo 'Name: OpenCV' >> opencv4.pc
         echo 'Description: Open Source Computer Vision Library' >> opencv4.pc
         echo 'Version: 4.5.4' >> opencv4.pc
-        echo 'Libs: -L${libdir} -lopencv_stitching -lopencv_highgui -lopencv_dnn -lopencv_ml -lopencv_videoio -lopencv_video -lopencv_objdetect -lopencv_calib3d -lopencv_imgcodecs -lopencv_features2d -lopencv_flann -lopencv_photo -lopencv_imgproc -lopencv_core' >> opencv4.pc
+        echo 'Libs: -L${exec_prefix}/lib64 -lopencv_gapi -lopencv_highgui -lopencv_ml -lopencv_objdetect -lopencv_photo -lopencv_stitching -lopencv_video -lopencv_calib3d -lopencv_features2d -lopencv_dnn -lopencv_flann -lopencv_videoio -lopencv_imgcodecs -lopencv_imgproc -lopencv_core' >> opencv4.pc
         echo 'Libs.private: -ldl -lm -lpthread -lrt' >> opencv4.pc
         echo 'Cflags: -I${includedir}' >> opencv4.pc
     else
         echo -e "\033[33mopencv4.pc already exist.\033[0m"
     fi
+    chmod 777 opencv4.pc
 
     echo 'Setting pkg-config envs for root...'
     cd ~
