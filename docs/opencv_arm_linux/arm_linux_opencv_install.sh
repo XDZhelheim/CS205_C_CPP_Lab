@@ -133,6 +133,7 @@ function run_test() {
     echo -e "########################################\033[0m"
 
     echo 'Compiling and running test...'
+    cd ~
 
     if [ -f "${test_file}.cpp" ]; then
         rm "${test_file}.cpp"
