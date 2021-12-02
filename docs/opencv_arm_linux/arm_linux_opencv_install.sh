@@ -70,7 +70,7 @@ if [ ! -f ${bashrc} ]; then
     touch ${bashrc}
 fi
 
-if [[ -z "$(cat ${bashrc}) | grep /usr/local/lib64/" ]]; then
+if [[ -z "$(cat ${bashrc} | grep /usr/local/lib64/)" ]] || [[ -z "$(cat ${bashrc} | grep /usr/local/include/opencv4)" ]]; then
     echo '# opencv envs' >> ${bashrc}
     echo 'export C_INCLUDE_PATH="/usr/local/include/opencv4:$C_INCLUDE_PATH"' >> ${bashrc}
     echo 'export CPLUS_INCLUDE_PATH="/usr/local/include/opencv4:$CPLUS_INCLUDE_PATH"' >> ${bashrc}
