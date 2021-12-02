@@ -167,6 +167,12 @@ function signature() {
 
 # --------------------------------------------------------------------------------------------
 
+if [[ "$(uname -m)" != 'aarch64' ]]; then
+    echo -e "\033[31mPlease run this script on our lab's ARM server.\033[0m"
+    signature
+    exit 1
+fi
+
 if [[ "$(whoami)" != 'root' ]]; then
     echo -e "\033[31mPlease run this script on root user.\033[0m"
     signature
