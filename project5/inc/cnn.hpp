@@ -1,10 +1,14 @@
-#pragma once
+#ifndef CNN_HPP
+#define CNN_HPP
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
-#include "face_binary_cls.hpp"
+#include "params.hpp"
 
+using std::cin;
+using std::cout;
+using std::endl;
 using cv::Mat;
 
 class layer {
@@ -58,3 +62,5 @@ class fc_layer : public layer {
 
 class cnn {
 };
+
+#endif
