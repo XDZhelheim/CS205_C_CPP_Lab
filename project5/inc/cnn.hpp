@@ -6,18 +6,20 @@
 
 #include "params.hpp"
 
+using cv::imread;
 using cv::Mat;
 using std::cin;
 using std::cout;
 using std::endl;
 using std::vector;
 
-class layer {
+class Layer {
    public:
+    virtual ~Layer() = default;
     virtual Mat forward(Mat& mat) = 0;
 };
 
-class conv_bn_layer : public layer {
+class ConvBNLayer : public Layer {
    private:
     int pad;
     int stride;
@@ -28,7 +30,7 @@ class conv_bn_layer : public layer {
     float* bias;
 
    public:
-    conv_bn_layer(int pad, int stride, int kernel_size, int in_channels, int out_channels, float* weight, float* bias) {
+    ConvBNLayer(int pad, int stride, int kernel_size, int in_channels, int out_channels, float* weight, float* bias) {
         this->pad = pad;
         this->stride = stride;
         this->kernel_size = kernel_size;
@@ -38,7 +40,7 @@ class conv_bn_layer : public layer {
         this->bias = bias;
     }
 
-    conv_bn_layer(conv_param& param) {
+    ConvBNLayer(conv_param& param) {
         this->pad = param.pad;
         this->stride = param.stride;
         this->kernel_size = param.kernel_size;
@@ -48,68 +50,59 @@ class conv_bn_layer : public layer {
         this->bias = param.p_bias;
     }
 
-    conv_bn_layer() = delete;
-    ~conv_bn_layer() = default;
+    ConvBNLayer() = delete;
 
     Mat conv_bn(Mat& mat);
 
     Mat forward(Mat& mat) override;
 };
 
-class relu_layer : public layer {
+class ReLULayer : public Layer {
    public:
     Mat relu(Mat& mat);
 
     Mat forward(Mat& mat) override;
 };
 
-class max_pooling_layer : public layer {
+class MaxPoolingLayer : public Layer {
    public:
     int size;
 
-    max_pooling_layer(int size) {
+    MaxPoolingLayer(int size) {
         this->size = size;
     }
 
-    max_pooling_layer() = delete;
+    MaxPoolingLayer() = delete;
 
     Mat max_pooling(Mat& mat);
 
     Mat forward(Mat& mat) override;
 };
 
-class fc_layer : public layer {
+class FCLayer : public Layer {
    public:
     int in_size;
     int out_size;
 
-    fc_layer(int in_size, int out_size) {
+    FCLayer(int in_size, int out_size) {
         this->in_size = in_size;
         this->out_size = out_size;
     }
 
-    fc_layer() = delete;
+    FCLayer() = delete;
 
     Mat full_connect(Mat& mat);
 
     Mat forward(Mat& mat) override;
 };
 
-class cnn {
+class CNN {
    public:
-    vector<layer*> layers;
+    vector<Layer*> layers;
 
-    void add_layer(layer* l) {
-        layers.push_back(l);
-    }
+    void add_layer(Layer* l);
 
-    Mat prediction(Mat& image) {
-        Mat res = image;
-        for (auto l : layers) {
-            res = l->forward(res);
-        }
-        return res;
-    }
+    Mat predict(Mat& image);
 };
 
 #endif

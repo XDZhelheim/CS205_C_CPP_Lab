@@ -50,3 +50,5 @@ test*.txt
 
 html/
 Doxyfile
+
+build/
