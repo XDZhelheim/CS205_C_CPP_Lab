@@ -1,6 +1,6 @@
 #include "cnn.hpp"
 #include "params.hpp"
-#define DEBUG 0
+#define DEBUG 1
 
 using std::cin;
 using std::cout;
@@ -12,33 +12,40 @@ int main(int argc, char const* argv[]) {
 
         cnn.add_layer(new ConvBNLayer(conv_params[0]));
         cnn.add_layer(new ReLULayer());
-        cnn.add_layer(new MaxPoolingLayer(2, 2));
-        cnn.add_layer(new ConvBNLayer(conv_params[1]));
-        cnn.add_layer(new ReLULayer());
-        cnn.add_layer(new MaxPoolingLayer(2, 2));
-        cnn.add_layer(new ConvBNLayer(conv_params[2]));
-        cnn.add_layer(new ReLULayer());
-        cnn.add_layer(new FCLayer(fc_params[0]));
-        cnn.add_layer(new SoftmaxLayer());
+        // cnn.add_layer(new MaxPoolingLayer(2, 2));
+        // cnn.add_layer(new ConvBNLayer(conv_params[1]));
+        // cnn.add_layer(new ReLULayer());
+        // cnn.add_layer(new MaxPoolingLayer(2, 2));
+        // cnn.add_layer(new ConvBNLayer(conv_params[2]));
+        // cnn.add_layer(new ReLULayer());
+        // cnn.add_layer(new FCLayer(fc_params[0]));
+        // cnn.add_layer(new SoftmaxLayer());
 
         Matrix2dArray<float> res = cnn.predict("../samples/face.jpg");
-        res.base_mat.print();
+        // res.base_mat.print();
+        res.base_mat.print("./temp.txt");
 
         return 0;
     }
 
     // DEBUG codes, I wanna keep them
-    int a[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    int b[6] = {1, 2, 3, 4, 5, 6};
-    int c[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    int d[16] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+    float a[3 * 3 * 3] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    float b[6] = {1, 2, 3, 4, 5, 6};
+    float c[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    float d[16] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+
+    Matrix2dArray<float> temp(1, 3, 3, 3, a);
+    // temp.print();
+    // temp(0, 0).print();
+    temp.base_mat.print();
+    exit(0);
 
     float k[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
-    int k2[4] = {3, 3, 3, 3};
+    float k2[4] = {3, 3, 3, 3};
     Matrix<float> kernel(3, 3, k);
-    Matrix<int> kernel2(2, 2, k2);
+    Matrix<float> kernel2(2, 2, k2);
 
-    Matrix<int> m4(4, 4, d);
+    Matrix<float> m4(4, 4, d);
 
     int kernel_size = 3;
     int padding = 1;
@@ -84,9 +91,10 @@ int main(int argc, char const* argv[]) {
     cv::Mat img = cv::imread("../samples/face.jpg");
     cv::Mat fimg;
     img.convertTo(fimg, CV_32FC3);
-    cv::normalize(fimg, fimg);
+    fimg = fimg / 255;
     cout << fimg.channels() << endl;
     cout << fimg.size << endl;
+    // cout << fimg << endl;
 
     return 0;
 }

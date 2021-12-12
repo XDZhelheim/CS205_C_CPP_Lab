@@ -69,7 +69,8 @@ template <typename T>
 inline Matrix2dArray<T>::Matrix2dArray(const cv::Mat& cv_image) {
     cv::Mat float_mat;
     cv_image.convertTo(float_mat, CV_32FC3);
-    cv::normalize(float_mat, float_mat);
+    // cv::normalize(float_mat, float_mat);
+    float_mat = float_mat / 255.0f;
 
     this->dim1 = 1;
     this->dim2 = 3;
