@@ -41,9 +41,28 @@ int main(int argc, char const* argv[]) {
     float bias[5] = {-1.0f, -1.0f, -1.0f, -1.0f, -1.0f};
 
     Matrix2dArray<float> m2d(1, 3, 5, 5, rgb);
-    ConvBNLayer cbl(padding, stride, kernel_size, 3, 5, weight, bias);
 
-    cbl.conv_bn(m2d).print();
+    ConvBNLayer cbl(padding, stride, kernel_size, 3, 5, weight, bias);
+    m2d = cbl.conv_bn_m2d(m2d);
+    // m2d.print();
+
+    ReLULayer rl;
+    m2d = rl.relu_m2d(m2d);
+    // m2d.print();
+
+    MaxPoolingLayer mpl(2, 2);
+    m2d = mpl.max_pooling_m2d(m2d);
+    // m2d.print();
+
+    float fc_weight[2 * 20];
+    for (int i = 0; i < 2 * 20; i++) {
+        weight[i] = 2.0f;
+    }
+    float fc_bias[2] = {-1, -1};
+
+    FCLayer fcl(20, 2, fc_weight, fc_bias);
+    m2d = fcl.full_connect_m2d(m2d);
+    m2d.print();
 
     return 0;
 }

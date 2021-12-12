@@ -242,6 +242,13 @@ class Matrix {
      */
     static Matrix<T> create_diagonal(int nrows, T fill);
 
+    /**
+     * @brief Get the transpose matrix.
+     * 
+     * @return Matrix<T> Transpose matrix
+     */
+    Matrix<T> transpose();
+
     // I/O ------------------------------------------------------------------------------------------------------------------------------
     /**
      * @brief Create a matrix from file.
@@ -491,10 +498,26 @@ class Matrix {
      * 
      * @param kernel Convolution kernel.
      * @param padding 0: valid mode; 1: same mode
-     * @param stride Stride. Out size = in size / stride (same mode).
+     * @param stride Stride.
      * @return Matrix<T> Convolution result.
      */
     Matrix<T> convolution(Matrix<T>& kernel, bool padding, int stride);
+
+    /**
+     * @brief Max pooling.
+     * 
+     * @param pool_size Size of pooling kernel;
+     * @param stride Stride.
+     * @return Matrix<T> Max pooling result.
+     */
+    Matrix<T> max_pooling(int pool_size, int stride);
+
+    /**
+     * @brief Apply ReLU function to the whole matrix.
+     * 
+     * @return Matrix<T> ReLU output matrix.
+     */
+    Matrix<T> relu();
 
     /**
      * @brief For-loop matrix multiplication.
@@ -765,6 +788,19 @@ Matrix<T> Matrix<T>::create_diagonal(int nrows, T fill) {
 
     for (int i = 0; i < nrows; i++) {
         res[i][i] = fill;
+    }
+
+    return res;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::transpose() {
+    Matrix<T> res(this->ncols, this->nrows);
+
+    for (int i = 0; i < this->nrows; i++) {
+        for (int j = 0; j < this->ncols; j++) {
+            res[j][i] = (*this)[i][j];
+        }
     }
 
     return res;
@@ -1141,10 +1177,18 @@ Matrix<T> Matrix<T>::pad(int length) {
 
 template <typename T>
 Matrix<T> Matrix<T>::convolution(Matrix<T>& kernel, bool padding, int stride) {
-    if (this->nrows != this->ncols) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
-             << "Convolution error: this is not a square matrix." << endl;
-        exit(EXIT_FAILURE);
+    // if (this->nrows != this->ncols) {
+    //     cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+    //          << "Convolution error: this is not a square matrix." << endl;
+    //     exit(EXIT_FAILURE);
+    // }
+
+    if (not padding) {
+        if (kernel.nrows > this->nrows || kernel.ncols > this->ncols) {
+            cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+                 << "Convolution error: kernel is larger than input matrix when padding=0." << endl;
+            exit(EXIT_FAILURE);
+        }
     }
 
     if (kernel.nrows != kernel.ncols) {
@@ -1153,10 +1197,9 @@ Matrix<T> Matrix<T>::convolution(Matrix<T>& kernel, bool padding, int stride) {
         exit(EXIT_FAILURE);
     }
 
-    int size = this->nrows;
     int kernel_size = kernel.nrows;
 
-    Matrix<T> res((size + 2 * padding - kernel_size) / stride + 1, (size + 2 * padding - kernel_size) / stride + 1, (T)0);
+    Matrix<T> res((this->nrows + 2 * padding - kernel_size) / stride + 1, (this->ncols + 2 * padding - kernel_size) / stride + 1, (T)0);
 
     if (padding) {
         // pad_length = (kernel_size - 1) / 2
@@ -1181,13 +1224,49 @@ Matrix<T> Matrix<T>::convolution(Matrix<T>& kernel, bool padding, int stride) {
         }
     } else {
         int res_i = 0;
-        for (int i = 0; i <= size - kernel_size; i += stride) {
+        for (int i = 0; i <= this->nrows - kernel_size; i += stride) {
             int res_j = 0;
-            for (int j = 0; j <= size - kernel_size; j += stride) {
+            for (int j = 0; j <= this->ncols - kernel_size; j += stride) {
                 res[res_i][res_j] = this->submatrix_ROI(i, i + kernel_size, j, j + kernel_size).multiply_elements(kernel).sum();
                 res_j++;
             }
             res_i++;
+        }
+    }
+
+    return res;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::max_pooling(int pool_size, int stride) {
+    if (pool_size > this->nrows || pool_size > this->ncols) {
+        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+             << "Max pooling error: kernel is larger than input matrix." << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    Matrix<T> res((this->nrows - pool_size) / stride + 1, (this->ncols - pool_size) / stride + 1, (T)0);
+
+    int res_i = 0;
+    for (int i = 0; i <= this->nrows - pool_size; i += stride) {
+        int res_j = 0;
+        for (int j = 0; j <= this->ncols - pool_size; j += stride) {
+            res[res_i][res_j] = this->submatrix_ROI(i, i + pool_size, j, j + pool_size).max();
+            res_j++;
+        }
+        res_i++;
+    }
+
+    return res;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::relu() {
+    Matrix<T> res(this->nrows, this->ncols);
+
+    for (int i = 0; i < res.nrows; i++) {
+        for (int j = 0; j < res.ncols; j++) {
+            res[i][j] = std::max((T)0, (*this)[i][j]);
         }
     }
 

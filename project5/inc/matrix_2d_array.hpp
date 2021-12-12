@@ -17,6 +17,7 @@ class Matrix2dArray {
    public:
     Matrix2dArray(int dim1, int dim2, int nrows, int ncols, T* data);
     Matrix2dArray(int dim1, int dim2, int nrows, int ncols);
+    Matrix2dArray(int dim1, int dim2, int nrows, int ncols, Matrix<T>& m);
     Matrix2dArray(const cv::Mat& cv_image);
     Matrix2dArray(const char* image_path);
     Matrix2dArray() = default;
@@ -53,6 +54,15 @@ inline Matrix2dArray<T>::Matrix2dArray(int dim1, int dim2, int nrows, int ncols)
     this->nrows = nrows;
     this->ncols = ncols;
     this->base_mat = Matrix<T>(dim1 * nrows, dim2 * ncols, (T)0);
+}
+
+template <typename T>
+inline Matrix2dArray<T>::Matrix2dArray(int dim1, int dim2, int nrows, int ncols, Matrix<T>& m) {
+    this->dim1 = dim1;
+    this->dim2 = dim2;
+    this->nrows = nrows;
+    this->ncols = ncols;
+    this->base_mat = m;
 }
 
 template <typename T>
