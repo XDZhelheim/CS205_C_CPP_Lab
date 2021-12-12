@@ -1,12 +1,16 @@
 #include "cnn.hpp"
+#include "cnn.cpp"
+
+using std::cin;
+using std::cout;
+using std::endl;
 
 int main(int argc, char const* argv[]) {
-    Mat image = imread("../samples/face.jpg");
 
     CNN cnn;
-    Mat res = cnn.predict(image);
+    Matrix2dArray<float> res = cnn.predict("../samples/face.jpg");
 
-    cout << res << endl;
+    res.print();
 
     return 0;
 }
