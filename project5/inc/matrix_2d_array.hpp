@@ -26,8 +26,9 @@ class Matrix2dArray {
 
     Matrix<T> operator()(int d1, int d2);
     T& operator()(int d1, int d2, int i, int j);
-
     Matrix2dArray<T>& operator=(const Matrix2dArray<T>& other);
+
+    T* convert_data_array(T* data);
     Matrix2dArray<T> read_image(const char* image_path);
     void print();
 };
@@ -44,7 +45,10 @@ inline Matrix2dArray<T>::Matrix2dArray(int dim1, int dim2, int nrows, int ncols,
     this->dim2 = dim2;
     this->nrows = nrows;
     this->ncols = ncols;
-    this->base_mat = Matrix<T>(dim1 * nrows, dim2 * ncols, data);
+
+    T* converted_data = this->convert_data_array(data);
+    this->base_mat = Matrix<T>(dim1 * nrows, dim2 * ncols, converted_data);
+    delete[] converted_data;
 }
 
 template <typename T>
@@ -76,7 +80,10 @@ inline Matrix2dArray<T>::Matrix2dArray(const cv::Mat& cv_image) {
     this->dim2 = 3;
     this->nrows = float_mat.rows;
     this->ncols = float_mat.cols;
-    this->base_mat = Matrix<float>(this->dim1 * this->nrows, this->dim2 * this->ncols, (float*)float_mat.data);
+
+    T* converted_data = this->convert_data_array((T*)float_mat.data);
+    this->base_mat = Matrix<T>(this->dim1 * this->nrows, this->dim2 * this->ncols, converted_data);
+    delete[] converted_data;
 }
 
 template <typename T>
@@ -123,6 +130,18 @@ inline Matrix2dArray<T>& Matrix2dArray<T>::operator=(const Matrix2dArray<T>& oth
     this->base_mat = other.base_mat;
 
     return *this;
+}
+
+template <typename T>
+T* Matrix2dArray<T>::convert_data_array(T* data) {
+    int length = this->dim1 * this->dim2 * this->nrows * this->ncols;
+    T* converted_data = new T[length];
+
+    for (int i = 0; i < length; i++) {
+        converted_data[i] = data[i]; // TODO
+    }
+
+    return converted_data;
 }
 
 template <typename T>

@@ -29,12 +29,12 @@ int main(int argc, char const* argv[]) {
     }
 
     // DEBUG codes, I wanna keep them
-    float a[3 * 3 * 3] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    float a[2 * 3 * 3 * 3] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     float b[6] = {1, 2, 3, 4, 5, 6};
     float c[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
     float d[16] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
 
-    Matrix2dArray<float> temp(1, 3, 3, 3, a);
+    Matrix2dArray<float> temp(2, 3, 3, 3, a);
     // temp.print();
     // temp(0, 0).print();
     temp.base_mat.print();
