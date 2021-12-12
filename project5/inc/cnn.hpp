@@ -1,6 +1,7 @@
 #ifndef CNN_HPP
 #define CNN_HPP
 
+#include <cmath>
 #include <iostream>
 
 #include "matrix_2d_array.hpp"
@@ -67,7 +68,7 @@ class FCLayer : public Layer {
     FCLayer(fc_param& param);
     FCLayer() = delete;
 
-    Matrix2dArray<float> full_connect_m2d(Matrix2dArray<float>& m2d);
+    Matrix2dArray<float> fully_connect_m2d(Matrix2dArray<float>& m2d);
 
     Matrix2dArray<float> forward(Matrix2dArray<float>& m2d) override;
 };
@@ -117,7 +118,8 @@ inline ConvBNLayer::ConvBNLayer(conv_param& param) {
 Matrix2dArray<float> ConvBNLayer::conv_bn_m2d(Matrix2dArray<float>& m2d) {
     Matrix2dArray<float> res(1, this->out_channels, (m2d.nrows + 2 * padding - kernel_size) / stride + 1, (m2d.ncols + 2 * padding - kernel_size) / stride + 1);
 
-    cout << "conv res size = " << res.nrows << " * " << res.ncols << endl;
+    cout << "conv res size = "
+         << "[" << res.dim1 << ", " << res.dim2 << "] " << res.nrows << " * " << res.ncols << endl;
 
     for (int i = 0; i < this->in_channels; i++) {
         Matrix<float> in_mat = m2d(0, i);
@@ -143,7 +145,8 @@ Matrix2dArray<float> ConvBNLayer::forward(Matrix2dArray<float>& m2d) {
 Matrix2dArray<float> ReLULayer::relu_m2d(Matrix2dArray<float>& m2d) {
     Matrix2dArray<float> res(m2d.dim1, m2d.dim2, m2d.nrows, m2d.ncols);
 
-    cout << "relu res size = " << res.nrows << " * " << res.ncols << endl;
+    cout << "relu res size = "
+         << "[" << res.dim1 << ", " << res.dim2 << "] " << res.nrows << " * " << res.ncols << endl;
 
     for (int i = 0; i < m2d.dim1; i++) {
         for (int j = 0; j < m2d.dim2; j++) {
@@ -169,7 +172,8 @@ inline MaxPoolingLayer::MaxPoolingLayer(int pool_size, int stride) {
 Matrix2dArray<float> MaxPoolingLayer::max_pooling_m2d(Matrix2dArray<float>& m2d) {
     Matrix2dArray<float> res(m2d.dim1, m2d.dim2, (m2d.nrows - pool_size) / stride + 1, (m2d.ncols - pool_size) / stride + 1);
 
-    cout << "max pooling res size = " << res.nrows << " * " << res.ncols << endl;
+    cout << "max pooling res size = "
+         << "[" << res.dim1 << ", " << res.dim2 << "] " << res.nrows << " * " << res.ncols << endl;
 
     for (int i = 0; i < m2d.dim1; i++) {
         for (int j = 0; j < m2d.dim2; j++) {
@@ -198,21 +202,13 @@ inline FCLayer::FCLayer(fc_param& param) {
     this->in_features = param.in_features;
     this->out_features = param.out_features;
     this->weight_m2d = Matrix2dArray<float>(1, 1, param.out_features, param.in_features, param.p_weight);
-    this->bias = bias;
+    this->bias = param.p_bias;
 }
 
-Matrix2dArray<float> FCLayer::full_connect_m2d(Matrix2dArray<float>& m2d) {
+Matrix2dArray<float> FCLayer::fully_connect_m2d(Matrix2dArray<float>& m2d) {
     Matrix<float> weight_t = this->weight_m2d.base_mat.transpose();
-    this->weight_m2d.base_mat.print();
-    cout<<"------"<<endl;
-    weight_t.print();
-    cout<<"------"<<endl;
     Matrix<float> flattened_matrix = Matrix<float>(1, m2d.base_mat.get_nrows() * m2d.base_mat.get_ncols(), m2d.base_mat.get_data());
-    flattened_matrix.print();
-    cout<<"------"<<endl;
     Matrix<float> product = flattened_matrix * weight_t;
-    product.print();
-    cout<<"------"<<endl;
 
     assert(product.get_nrows() == 1);
     assert(product.get_ncols() == this->out_features);
@@ -221,11 +217,34 @@ Matrix2dArray<float> FCLayer::full_connect_m2d(Matrix2dArray<float>& m2d) {
         product[0][j] += bias[j];
     }
 
-    return Matrix2dArray<float>(1, 1, product.get_nrows(), product.get_ncols(), product);
+    Matrix2dArray<float> res(1, 1, product.get_nrows(), product.get_ncols(), product);
+
+    cout << "fully connect res size = "
+         << "[" << res.dim1 << ", " << res.dim2 << "] " << res.nrows << " * " << res.ncols << endl;
+
+    return res;
 }
 
 Matrix2dArray<float> FCLayer::forward(Matrix2dArray<float>& m2d) {
-    return this->full_connect_m2d(m2d);
+    return this->fully_connect_m2d(m2d);
+}
+
+Matrix2dArray<float> SoftmaxLayer::softmax_m2d(Matrix2dArray<float>& m2d) {
+    assert(m2d.dim1 == 1 && m2d.nrows == 1);
+
+    float sum_exp = 0;
+    for (int i = 0; i < m2d.nrows * m2d.ncols; i++) {
+        sum_exp += std::exp(m2d.base_mat.get_data()[i]);
+    }
+    for (int i = 0; i < m2d.nrows * m2d.ncols; i++) {
+        m2d.base_mat.get_data()[i] = std::exp(m2d.base_mat.get_data()[i]) / sum_exp;
+    }
+
+    return m2d;
+}
+
+Matrix2dArray<float> SoftmaxLayer::forward(Matrix2dArray<float>& m2d) {
+    return this->softmax_m2d(m2d);
 }
 
 inline void CNN::add_layer(Layer* l) {

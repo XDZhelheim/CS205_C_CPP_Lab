@@ -67,7 +67,15 @@ inline Matrix2dArray<T>::Matrix2dArray(int dim1, int dim2, int nrows, int ncols,
 
 template <typename T>
 inline Matrix2dArray<T>::Matrix2dArray(const cv::Mat& cv_image) {
-    // TODO convert cv::Mat
+    cv::Mat float_mat;
+    cv_image.convertTo(float_mat, CV_32FC3);
+    cv::normalize(float_mat, float_mat);
+
+    this->dim1 = 1;
+    this->dim2 = 3;
+    this->nrows = float_mat.rows;
+    this->ncols = float_mat.cols;
+    this->base_mat = Matrix<float>(this->dim1 * this->nrows, this->dim2 * this->ncols, (float*)float_mat.data);
 }
 
 template <typename T>
