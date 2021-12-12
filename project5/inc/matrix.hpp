@@ -490,7 +490,7 @@ class Matrix {
      * @brief Convolution.
      * 
      * @param kernel Convolution kernel.
-     * @param pad 0: valid mode; 1: same mode
+     * @param padding 0: valid mode; 1: same mode
      * @param stride Stride. Out size = in size / stride (same mode).
      * @return Matrix<T> Convolution result.
      */
@@ -1157,7 +1157,6 @@ Matrix<T> Matrix<T>::convolution(Matrix<T>& kernel, bool padding, int stride) {
     int kernel_size = kernel.nrows;
 
     Matrix<T> res((size + 2 * padding - kernel_size) / stride + 1, (size + 2 * padding - kernel_size) / stride + 1, (T)0);
-    cout << "conv res size = " << res.nrows << endl;
 
     if (padding) {
         // pad_length = (kernel_size - 1) / 2

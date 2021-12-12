@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-#include "params.hpp"
 #include "matrix_2d_array.hpp"
+#include "params.hpp"
 
 using std::vector;
 
@@ -16,7 +16,7 @@ class Layer {
 
 class ConvBNLayer : public Layer {
    private:
-    bool pad;
+    bool padding;
     int stride;
     int kernel_size;
     int in_channels;
@@ -25,7 +25,7 @@ class ConvBNLayer : public Layer {
     float* bias;
 
    public:
-    ConvBNLayer(int pad, int stride, int kernel_size, int in_channels, int out_channels, float* weight, float* bias);
+    ConvBNLayer(int padding, int stride, int kernel_size, int in_channels, int out_channels, float* weight, float* bias);
     ConvBNLayer(conv_param& param);
     ConvBNLayer() = delete;
 
@@ -93,38 +93,46 @@ using std::cin;
 using std::cout;
 using std::endl;
 
-inline ConvBNLayer::ConvBNLayer(int pad, int stride, int kernel_size, int in_channels, int out_channels, float* weight, float* bias) {
-    this->pad = pad;
+inline ConvBNLayer::ConvBNLayer(int padding, int stride, int kernel_size, int in_channels, int out_channels, float* weight, float* bias) {
+    this->padding = padding;
     this->stride = stride;
     this->kernel_size = kernel_size;
     this->in_channels = in_channels;
     this->out_channels = out_channels;
-    this->weight_m2d = Matrix2dArray<float>(in_channels, out_channels, kernel_size, kernel_size, weight);
+    this->weight_m2d = Matrix2dArray<float>(out_channels, in_channels, kernel_size, kernel_size, weight);
     this->bias = bias;
 }
 
 inline ConvBNLayer::ConvBNLayer(conv_param& param) {
-    this->pad = param.pad;
+    this->padding = param.pad;
     this->stride = param.stride;
     this->kernel_size = param.kernel_size;
     this->in_channels = param.in_channels;
     this->out_channels = param.out_channels;
-    this->weight_m2d = Matrix2dArray<float>(param.in_channels, param.out_channels, param.kernel_size, param.kernel_size, param.p_weight);
+    this->weight_m2d = Matrix2dArray<float>(param.out_channels, param.in_channels, param.kernel_size, param.kernel_size, param.p_weight);
     this->bias = param.p_bias;
 }
 
 Matrix2dArray<float> ConvBNLayer::conv_bn(Matrix2dArray<float>& m2d) {
-    Matrix2dArray<float> res(1, this->out_channels, m2d.nrows, m2d.ncols);
+    int size = m2d.nrows;
+
+    Matrix2dArray<float> res(1, this->out_channels, (size + 2 * padding - kernel_size) / stride + 1, (size + 2 * padding - kernel_size) / stride + 1);
+
+    cout << "conv res size = " << res.nrows << endl;
 
     for (int i = 0; i < this->in_channels; i++) {
         Matrix<float> in_mat = m2d(0, i);
         for (int o = 0; o < this->out_channels; o++) {
             Matrix<float> weight_mat = this->weight_m2d(o, i);
 
-            Matrix<float> conv_res = in_mat.convolution(weight_mat, this->pad, this->stride);
+            Matrix<float> conv_res = in_mat.convolution(weight_mat, this->padding, this->stride);
             res(0, o) += conv_res;
             // TODO conv_bn
         }
+    }
+
+    for (int o = 0; o < out_channels; o++) {
+        res(0, o) += this->bias[o];
     }
 
     return res;

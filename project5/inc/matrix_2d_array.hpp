@@ -2,6 +2,7 @@
 #define MATRIX_2D_ARRAY_HPP
 
 #include <opencv2/opencv.hpp>
+
 #include "matrix.hpp"
 
 template <typename T>
@@ -69,7 +70,8 @@ inline Matrix2dArray<T>::Matrix2dArray(const char* image_path) {
 template <typename T>
 inline Matrix<T> Matrix2dArray<T>::operator()(int d1, int d2) {
     if (d1 > this->dim1 - 1 || d2 > this->dim2 - 1) {
-        cout << "Index error: array index out of bound." << endl;
+        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+             << "Index error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -79,12 +81,14 @@ inline Matrix<T> Matrix2dArray<T>::operator()(int d1, int d2) {
 template <typename T>
 inline T& Matrix2dArray<T>::operator()(int d1, int d2, int i, int j) {
     if (d1 > this->dim1 - 1 || d2 > this->dim2 - 1) {
-        cout << "Index error: array index out of bound." << endl;
+        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+             << "Index error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
 
     if (i > this->nrows - 1 || j > this->ncols - 1) {
-        cout << "Index error: array index out of bound." << endl;
+        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+             << "Index error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -110,10 +114,11 @@ Matrix2dArray<T> Matrix2dArray<T>::read_image(const char* image_path) {
 template <typename T>
 void Matrix2dArray<T>::print() {
     for (int i = 0; i < this->dim1; i++) {
-        for (int j = 0; i < this->dim2; j++) {
+        for (int j = 0; j < this->dim2; j++) {
+            cout << "Row " << i << " Col " << j << endl;
             this->operator()(i, j).print();
+            cout << endl;
         }
-        cout << endl;
     }
 }
 
