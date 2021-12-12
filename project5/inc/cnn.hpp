@@ -16,7 +16,7 @@ class Layer {
 
 class ConvBNLayer : public Layer {
    private:
-    int pad;
+    bool pad;
     int stride;
     int kernel_size;
     int in_channels;
@@ -123,6 +123,7 @@ Matrix2dArray<float> ConvBNLayer::conv_bn(Matrix2dArray<float>& m2d) {
 
             Matrix<float> conv_res = in_mat.convolution(weight_mat, this->pad, this->stride);
             res(0, o) += conv_res;
+            // TODO conv_bn
         }
     }
 

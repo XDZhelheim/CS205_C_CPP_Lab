@@ -56,7 +56,7 @@ inline Matrix2dArray<T>::Matrix2dArray(int dim1, int dim2, int nrows, int ncols)
 
 template <typename T>
 inline Matrix2dArray<T>::Matrix2dArray(const cv::Mat& cv_image) {
-    // TODO
+    // TODO convert cv::Mat
 }
 
 template <typename T>
