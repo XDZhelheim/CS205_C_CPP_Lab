@@ -1,5 +1,5 @@
 #include "cnn.hpp"
-#include "cnn.cpp"
+#include "params.hpp"
 
 using std::cin;
 using std::cout;

@@ -2,38 +2,12 @@
 #define CNN_HPP
 
 #include <iostream>
-#include <opencv2/opencv.hpp>
 
-#include "matrix.hpp"
 #include "params.hpp"
+#include "matrix_2d_array.hpp"
 
 using std::vector;
 
-template <typename T>
-class Matrix2dArray {
-   public:
-    int dim1;
-    int dim2;
-    int nrows;
-    int ncols;
-    Matrix<T> base_mat;
-
-   public:
-    Matrix2dArray(int dim1, int dim2, int nrows, int ncols, T* data);
-    Matrix2dArray(int dim1, int dim2, int nrows, int ncols);
-    Matrix2dArray(const cv::Mat& cv_image);
-    Matrix2dArray(const char* image_path);
-    Matrix2dArray() = default;
-    Matrix2dArray(const Matrix2dArray<T>& other) = default;
-    ~Matrix2dArray() = default;
-
-    Matrix<T> operator()(int d1, int d2);
-    T& operator()(int d1, int d2, int i, int j);
-
-    Matrix2dArray<T>& operator=(const Matrix2dArray<T>& other);
-    Matrix2dArray<T> read_image(const char* image_path);
-    void print();
-};
 class Layer {
    public:
     virtual ~Layer() = default;
@@ -112,5 +86,77 @@ class CNN {
 
     Matrix2dArray<float> predict(const char* image_path);
 };
+
+// -------------------------------------------------------------------------------------------
+
+using std::cin;
+using std::cout;
+using std::endl;
+
+inline ConvBNLayer::ConvBNLayer(int pad, int stride, int kernel_size, int in_channels, int out_channels, float* weight, float* bias) {
+    this->pad = pad;
+    this->stride = stride;
+    this->kernel_size = kernel_size;
+    this->in_channels = in_channels;
+    this->out_channels = out_channels;
+    this->weight_m2d = Matrix2dArray<float>(in_channels, out_channels, kernel_size, kernel_size, weight);
+    this->bias = bias;
+}
+
+inline ConvBNLayer::ConvBNLayer(conv_param& param) {
+    this->pad = param.pad;
+    this->stride = param.stride;
+    this->kernel_size = param.kernel_size;
+    this->in_channels = param.in_channels;
+    this->out_channels = param.out_channels;
+    this->weight_m2d = Matrix2dArray<float>(param.in_channels, param.out_channels, param.kernel_size, param.kernel_size, param.p_weight);
+    this->bias = param.p_bias;
+}
+
+Matrix2dArray<float> ConvBNLayer::conv_bn(Matrix2dArray<float>& m2d) {
+    Matrix2dArray<float> res(1, this->out_channels, m2d.nrows, m2d.ncols);
+
+    for (int i = 0; i < this->in_channels; i++) {
+        Matrix<float> in_mat = m2d(0, i);
+        for (int o = 0; o < this->out_channels; o++) {
+            Matrix<float> weight_mat = this->weight_m2d(o, i);
+
+            Matrix<float> conv_res = in_mat.convolution(weight_mat, this->pad, this->stride);
+            res(0, o) += conv_res;
+        }
+    }
+
+    return res;
+}
+
+Matrix2dArray<float> ConvBNLayer::forward(Matrix2dArray<float>& m2d) {
+    return this->conv_bn(m2d);
+}
+
+inline MaxPoolingLayer::MaxPoolingLayer(int size) {
+    this->size = size;
+}
+
+inline FCLayer::FCLayer(int in_features, int out_features, float* weight, float* bias) {
+    this->in_features = in_features;
+    this->out_features = out_features;
+    this->weight_m2d = Matrix2dArray<float>(1, 1, in_features, out_features, weight);
+    this->bias = bias;
+}
+
+inline FCLayer::FCLayer(fc_param& param) {
+}
+
+inline void CNN::add_layer(Layer* l) {
+    this->layers.push_back(l);
+}
+
+inline Matrix2dArray<float> CNN::predict(const char* image_path) {
+    Matrix2dArray<float> res = image_path;
+    for (auto l : this->layers) {
+        res = l->forward(res);
+    }
+    return res;
+}
 
 #endif
