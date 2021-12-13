@@ -13,6 +13,30 @@ using std::vector;
 
 typedef Matrix<Matrix<float>> M2D;
 
+void print_m2d(M2D& m2d) {
+    for (int d1 = 0; d1 < m2d.nrows; d1++) {
+        for (int d2 = 0; d2 < m2d.ncols; d2++) {
+            cout << "Row " << d1 << " Col " << d2 << endl;
+            m2d[d1][d2].print();
+            cout << endl;
+        }
+    }
+}
+
+Matrix<float> flatten(M2D& m2d) {
+    Matrix<float> res(1, m2d.nrows * m2d.ncols * m2d[0][0].nrows * m2d[0][0].ncols);
+
+    float* curr_p = res.data;
+    for (int d1 = 0; d1 < m2d.nrows; d1++) {
+        for (int d2 = 0; d2 < m2d.ncols; d2++) {
+            memcpy(curr_p, m2d[d1][d2].data, m2d[d1][d2].nrows * m2d[d1][d2].ncols * sizeof(float));
+            curr_p += m2d[d1][d2].nrows * m2d[d1][d2].ncols;
+        }
+    }
+
+    return res;
+}
+
 class Layer {
    public:
     virtual ~Layer() = default;
@@ -233,20 +257,6 @@ inline FCLayer::FCLayer(fc_param& param) {
     this->weight_m2d[0][0] = Matrix<float>(param.out_features, param.in_features, param.p_weight);
 
     this->bias = param.p_bias;
-}
-
-Matrix<float> flatten(M2D& m2d) {
-    Matrix<float> res(1, m2d.nrows * m2d.ncols * m2d[0][0].nrows * m2d[0][0].ncols);
-
-    float* curr_p = res.data;
-    for (int d1 = 0; d1 < m2d.nrows; d1++) {
-        for (int d2 = 0; d2 < m2d.ncols; d2++) {
-            memcpy(curr_p, m2d[d1][d2].data, m2d[d1][d2].nrows * m2d[d1][d2].ncols * sizeof(float));
-            curr_p += m2d[d1][d2].nrows * m2d[d1][d2].ncols;
-        }
-    }
-
-    return res;
 }
 
 M2D FCLayer::fully_connect_m2d(M2D& m2d) {

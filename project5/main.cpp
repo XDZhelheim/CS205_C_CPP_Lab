@@ -1,4 +1,3 @@
-// #include "cnn_matrix.hpp"
 #include "cnn.hpp"
 #include "params.hpp"
 #define DEBUG 0
