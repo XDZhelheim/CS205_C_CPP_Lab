@@ -28,7 +28,8 @@ class Matrix2dArray {
     T& operator()(int d1, int d2, int i, int j);
     Matrix2dArray<T>& operator=(const Matrix2dArray<T>& other);
 
-    T* convert_data_array(T* data);
+    static T* convert_data_array(int dim1, int dim2, int nrows, int ncols, T* data);
+    static T* reverse_convert_data_array(int dim1, int dim2, int nrows, int ncols, T* data);
     Matrix2dArray<T> read_image(const char* image_path);
     void print();
 };
@@ -45,10 +46,7 @@ inline Matrix2dArray<T>::Matrix2dArray(int dim1, int dim2, int nrows, int ncols,
     this->dim2 = dim2;
     this->nrows = nrows;
     this->ncols = ncols;
-
-    T* converted_data = this->convert_data_array(data);
-    this->base_mat = Matrix<T>(dim1 * nrows, dim2 * ncols, converted_data);
-    delete[] converted_data;
+    this->base_mat = Matrix<T>(dim1 * nrows, dim2 * ncols, data);
 }
 
 template <typename T>
@@ -70,7 +68,7 @@ inline Matrix2dArray<T>::Matrix2dArray(int dim1, int dim2, int nrows, int ncols,
 }
 
 template <typename T>
-inline Matrix2dArray<T>::Matrix2dArray(const cv::Mat& cv_image) {
+Matrix2dArray<T>::Matrix2dArray(const cv::Mat& cv_image) {
     cv::Mat float_mat;
     cv_image.convertTo(float_mat, CV_32FC3);
     // cv::normalize(float_mat, float_mat);
@@ -81,7 +79,7 @@ inline Matrix2dArray<T>::Matrix2dArray(const cv::Mat& cv_image) {
     this->nrows = float_mat.rows;
     this->ncols = float_mat.cols;
 
-    T* converted_data = this->convert_data_array((T*)float_mat.data);
+    T* converted_data = Matrix2dArray<T>::convert_data_array(this->dim1, this->dim2, this->nrows, this->ncols, (T*)float_mat.data);
     this->base_mat = Matrix<T>(this->dim1 * this->nrows, this->dim2 * this->ncols, converted_data);
     delete[] converted_data;
 }
@@ -133,12 +131,38 @@ inline Matrix2dArray<T>& Matrix2dArray<T>::operator=(const Matrix2dArray<T>& oth
 }
 
 template <typename T>
-T* Matrix2dArray<T>::convert_data_array(T* data) {
-    int length = this->dim1 * this->dim2 * this->nrows * this->ncols;
+T* Matrix2dArray<T>::convert_data_array(int dim1, int dim2, int nrows, int ncols, T* data) {
+    int length = dim1 * dim2 * nrows * ncols;
     T* converted_data = new T[length];
 
-    for (int i = 0; i < length; i++) {
-        converted_data[i] = data[i]; // TODO
+    for (int d1 = 0; d1 < dim1; d1++) {
+        for (int d2 = 0; d2 < dim2; d2++) {
+            for (int i = 0; i < nrows; i++) {
+                for (int j = 0; j < ncols; j++) {
+                    converted_data[d1 * (dim2 * nrows * ncols) + d2 * ncols + i * (ncols * dim2) + j]=
+                    data[d1 * (dim2 * nrows * ncols) + d2 * (nrows * ncols) + i * ncols + j];
+                }
+            }
+        }
+    }
+
+    return converted_data;
+}
+
+template <typename T>
+T* Matrix2dArray<T>::reverse_convert_data_array(int dim1, int dim2, int nrows, int ncols, T* data) {
+    int length = dim1 * dim2 * nrows * ncols;
+    T* converted_data = new T[length];
+
+    for (int d1 = 0; d1 < dim1; d1++) {
+        for (int d2 = 0; d2 < dim2; d2++) {
+            for (int i = 0; i < nrows; i++) {
+                for (int j = 0; j < ncols; j++) {
+                    converted_data[d1 * (dim2 * nrows * ncols) + d2 * (nrows * ncols) + i * ncols + j]=
+                    data[d1 * (dim2 * nrows * ncols) + d2 * ncols + i * (ncols * dim2) + j];
+                }
+            }
+        }
     }
 
     return converted_data;

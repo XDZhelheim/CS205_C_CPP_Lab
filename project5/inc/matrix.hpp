@@ -32,7 +32,7 @@
  */
 template <typename T>
 class Matrix {
-   private:
+   public:
     // fields ---------------------------------------------------------------------------------------------------------------------------
     /**
      * @brief Number of rows
@@ -520,6 +520,13 @@ class Matrix {
     Matrix<T> relu();
 
     /**
+     * @brief Flatten the matrix to a row vector.
+     * 
+     * @return Matrix<T> Flattened matrix.
+     */
+    Matrix<T> flatten();
+
+    /**
      * @brief For-loop matrix multiplication.
      * 
      * Time complexity: $O(n^3)$
@@ -763,7 +770,13 @@ template <typename T>
 inline Matrix<T> Matrix<T>::copy() {
     Matrix<T> res(this->nrows, this->ncols);
 
-    memcpy(res.data, this->data, this->nrows * this->ncols * sizeof(T));
+    // cannot use memcpy when copying a ROI
+    // memcpy(res.data, this->data, this->nrows * this->ncols * sizeof(T));
+    for (int i = 0; i < nrows; i++) {
+        for (int j = 0; j < ncols; j++) {
+            res[i][j] = (*this)[i][j];
+        }
+    }
 
     return res;
 }
@@ -1271,6 +1284,13 @@ Matrix<T> Matrix<T>::relu() {
     }
 
     return res;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::flatten() {
+    Matrix<T> res(1, this->nrows * this->ncols);
+    // TODO flatten
+
 }
 
 template <typename T>

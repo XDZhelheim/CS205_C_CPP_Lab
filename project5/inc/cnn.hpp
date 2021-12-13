@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 #include "matrix_2d_array.hpp"
 #include "params.hpp"
@@ -16,7 +17,7 @@ class Layer {
 };
 
 class ConvBNLayer : public Layer {
-   private:
+   public:
     bool padding;
     int stride;
     int kernel_size;
@@ -43,7 +44,7 @@ class ReLULayer : public Layer {
 };
 
 class MaxPoolingLayer : public Layer {
-   private:
+   public:
     int pool_size;
     int stride;
 
@@ -57,7 +58,7 @@ class MaxPoolingLayer : public Layer {
 };
 
 class FCLayer : public Layer {
-   private:
+   public:
     int in_features;
     int out_features;
     Matrix2dArray<float> weight_m2d;
@@ -101,7 +102,9 @@ inline ConvBNLayer::ConvBNLayer(int padding, int stride, int kernel_size, int in
     this->kernel_size = kernel_size;
     this->in_channels = in_channels;
     this->out_channels = out_channels;
-    this->weight_m2d = Matrix2dArray<float>(out_channels, in_channels, kernel_size, kernel_size, weight);
+    float* converted_array = Matrix2dArray<float>::convert_data_array(out_channels, in_channels, kernel_size, kernel_size, weight);
+    this->weight_m2d = Matrix2dArray<float>(out_channels, in_channels, kernel_size, kernel_size, converted_array);
+    delete[] converted_array;
     this->bias = bias;
 }
 
@@ -111,7 +114,9 @@ inline ConvBNLayer::ConvBNLayer(conv_param& param) {
     this->kernel_size = param.kernel_size;
     this->in_channels = param.in_channels;
     this->out_channels = param.out_channels;
-    this->weight_m2d = Matrix2dArray<float>(param.out_channels, param.in_channels, param.kernel_size, param.kernel_size, param.p_weight);
+    float* converted_array = Matrix2dArray<float>::convert_data_array(param.out_channels, param.in_channels, param.kernel_size, param.kernel_size, param.p_weight);
+    this->weight_m2d = Matrix2dArray<float>(param.out_channels, param.in_channels, param.kernel_size, param.kernel_size, converted_array);
+    delete[] converted_array;
     this->bias = param.p_bias;
 }
 
@@ -194,20 +199,24 @@ Matrix2dArray<float> MaxPoolingLayer::forward(Matrix2dArray<float>& m2d) {
 inline FCLayer::FCLayer(int in_features, int out_features, float* weight, float* bias) {
     this->in_features = in_features;
     this->out_features = out_features;
-    this->weight_m2d = Matrix2dArray<float>(1, 1, out_features, in_features, weight);
+    float* converted_array = Matrix2dArray<float>::convert_data_array(1, 1, out_features, in_features, weight);
+    this->weight_m2d = Matrix2dArray<float>(1, 1, out_features, in_features, converted_array);
+    delete[] converted_array;
     this->bias = bias;
 }
 
 inline FCLayer::FCLayer(fc_param& param) {
     this->in_features = param.in_features;
     this->out_features = param.out_features;
-    this->weight_m2d = Matrix2dArray<float>(1, 1, param.out_features, param.in_features, param.p_weight);
+    float* converted_array = Matrix2dArray<float>::convert_data_array(1, 1, param.out_features, param.in_features, param.p_weight);
+    this->weight_m2d = Matrix2dArray<float>(1, 1, param.out_features, param.in_features, converted_array);
+    delete[] converted_array;
     this->bias = param.p_bias;
 }
 
 Matrix2dArray<float> FCLayer::fully_connect_m2d(Matrix2dArray<float>& m2d) {
     Matrix<float> weight_t = this->weight_m2d.base_mat.transpose();
-    Matrix<float> flattened_matrix = Matrix<float>(1, m2d.base_mat.get_nrows() * m2d.base_mat.get_ncols(), m2d.base_mat.get_data());
+    Matrix<float> flattened_matrix = Matrix<float>(1, m2d.base_mat.get_nrows() * m2d.base_mat.get_ncols(), Matrix2dArray<float>::reverse_convert_data_array(m2d.dim1, m2d.dim2, m2d.nrows, m2d.ncols, m2d.base_mat.get_data()));
     Matrix<float> product = flattened_matrix * weight_t;
 
     assert(product.get_nrows() == 1);
