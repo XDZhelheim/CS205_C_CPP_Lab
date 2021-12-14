@@ -1,3 +1,6 @@
+#ifndef INPUT_PARSER_HPP
+#define INPUT_PARSER_HPP
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -33,3 +36,5 @@ class InputParser {
         return std::find(this->tokens.begin(), this->tokens.end(), option) != this->tokens.end();
     }
 };
+
+#endif
