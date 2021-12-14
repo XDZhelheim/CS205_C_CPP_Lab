@@ -1289,8 +1289,16 @@ Matrix<T> Matrix<T>::relu() {
 template <typename T>
 Matrix<T> Matrix<T>::flatten() {
     Matrix<T> res(1, this->nrows * this->ncols);
-    // TODO flatten
 
+    T* pdata = res.data;
+    for (int i = 0; i < this->nrows; i++) {
+        for (int j = 0; j < this->ncols; j++) {
+            *pdata = (*this)[i][j];
+            pdata++;
+        }
+    }
+
+    return res;
 }
 
 template <typename T>

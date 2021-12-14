@@ -11,6 +11,8 @@
 
 using std::vector;
 
+#define IMAGE_SIZE 128
+
 typedef Matrix<Matrix<float>> M2D;
 
 void print_m2d(M2D& m2d) {
@@ -326,6 +328,10 @@ M2D CNN::load_image(const char* image_path) {
         exit(EXIT_FAILURE);
     }
 
+    if (cv_image.rows!=IMAGE_SIZE || cv_image.cols!=IMAGE_SIZE) {
+        cv::resize(cv_image, cv_image, cv::Size(IMAGE_SIZE, IMAGE_SIZE));
+    }
+
     int nrows = cv_image.rows;
     int ncols = cv_image.cols;
 
@@ -376,8 +382,8 @@ void CNN::face_detection(const char* image_path, bool p_flag) {
     float face = res[0][0].data[1];
 
     if (p_flag) {
-        cout << setiosflags(std::ios::fixed) << std::setprecision(2) << "The probability of background is: " << bg * 100 << "%" << endl;
-        cout << setiosflags(std::ios::fixed) << std::setprecision(2) << "The probability of face is: " << face * 100 << "%" << endl;
+        cout << std::setiosflags(std::ios::fixed) << std::setprecision(2) << "The probability of background is: " << bg * 100 << "%" << endl;
+        cout << std::setiosflags(std::ios::fixed) << std::setprecision(2) << "The probability of face is: " << face * 100 << "%" << endl;
     } else {
         cout << "The probability of background is: " << bg << endl;
         cout << "The probability of face is: " << face << endl;

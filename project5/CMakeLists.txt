@@ -15,5 +15,5 @@ message(STATUS "opencv include path is: " ${OpenCV_INCLUDE_DIRS})
 message(STATUS "opencv lib path is: " ${OpenCV_LIBS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(main.out ${srcs})
-target_link_libraries(main.out ${OpenCV_LIBS})
+add_executable(face_detect ${srcs})
+target_link_libraries(face_detect ${OpenCV_LIBS})
