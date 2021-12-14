@@ -1,4 +1,4 @@
-#include "cnn.hpp"
+#include "cnn_m2da.hpp"
 #include "params.hpp"
 #define DEBUG 0
 

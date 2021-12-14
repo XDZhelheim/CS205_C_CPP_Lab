@@ -5,6 +5,8 @@ project(CNN)
 set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_STANDARD 11)
 
+set(CMAKE_CXX_FLAGS "-DNDBUG ${CMAKE_CXX_FLAGS}")
+
 include_directories(inc/)
 aux_source_directory(src/ srcs)
 
