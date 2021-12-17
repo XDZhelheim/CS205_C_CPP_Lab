@@ -77,7 +77,7 @@ function set_env() {
     echo -e "#            Setting Envs              #"
     echo -e "########################################\033[0m"
 
-    chmod 755 /usr/local/lib64/cmake/
+    chmod -R 755 /usr/local/lib64/cmake/
 
     echo 'Setting envs for root...'
     cd ~
