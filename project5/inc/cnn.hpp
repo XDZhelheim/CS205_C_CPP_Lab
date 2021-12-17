@@ -11,7 +11,7 @@
 
 using std::vector;
 
-#define IMAGE_SIZE 128
+#define IMAGE_SIZE_128 128
 
 typedef Matrix<Matrix<float>> M2D;
 
@@ -116,8 +116,8 @@ class CNN {
 
     void add_layer(Layer* l);
 
-    M2D load_image(const char* image_path);
-    M2D predict(const char* image_path);
+    M2D load_image(const char* image_path, int image_size);
+    M2D predict(const char* image_path, int image_size);
 
     static void face_detection(const char* image_path, bool p_flag = false);
 };
@@ -319,7 +319,7 @@ inline void CNN::add_layer(Layer* l) {
     this->layers.push_back(l);
 }
 
-M2D CNN::load_image(const char* image_path) {
+M2D CNN::load_image(const char* image_path, int image_size) {
     cv::Mat cv_image = cv::imread(image_path);
 
     if (cv_image.empty()) {
@@ -328,8 +328,8 @@ M2D CNN::load_image(const char* image_path) {
         exit(EXIT_FAILURE);
     }
 
-    if (cv_image.rows!=IMAGE_SIZE || cv_image.cols!=IMAGE_SIZE) {
-        cv::resize(cv_image, cv_image, cv::Size(IMAGE_SIZE, IMAGE_SIZE));
+    if (cv_image.rows!=image_size || cv_image.cols!=image_size) {
+        cv::resize(cv_image, cv_image, cv::Size(image_size, image_size));
     }
 
     int nrows = cv_image.rows;
@@ -351,8 +351,8 @@ M2D CNN::load_image(const char* image_path) {
     return res;
 }
 
-inline M2D CNN::predict(const char* image_path) {
-    M2D res = load_image(image_path);
+inline M2D CNN::predict(const char* image_path, int image_size) {
+    M2D res = load_image(image_path, image_size);
     for (auto l : this->layers) {
         res = l->forward(res);
     }
@@ -373,7 +373,7 @@ void CNN::face_detection(const char* image_path, bool p_flag) {
     cnn.add_layer(new FCLayer(fc_params[0]));
     cnn.add_layer(new SoftmaxLayer());
 
-    M2D res = cnn.predict(image_path);
+    M2D res = cnn.predict(image_path, IMAGE_SIZE_128);
 
     assert(res.nrows == res.ncols == 1);
     assert(res[0][0].nrows == 1 && res[0][0].ncols == 2);
