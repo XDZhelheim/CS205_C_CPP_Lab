@@ -101,6 +101,14 @@ class Matrix {
     void print_shape();
 
     /**
+     * @brief Change the shape of the matrix
+     * 
+     * @param nrows Number of rows.
+     * @param ncols Number of columns.
+     */
+    void reshape(int nrows, int ncols);
+
+    /**
      * @brief Judge if two matrices have the exactly same shape.
      * 
      * @param other Matrix that will be compared to.
@@ -504,6 +512,26 @@ class Matrix {
     Matrix<T> convolution(Matrix<T>& kernel, bool padding, int stride);
 
     /**
+     * @brief Convolution by element-wise multiplication.
+     * 
+     * @param kernel Convolution kernel.
+     * @param padding 0: valid mode; 1: same mode
+     * @param stride Stride.
+     * @return Matrix<T> Convolution result.
+     */
+    Matrix<T> convolution_multiply_element(Matrix<T>& kernel, bool padding, int stride);
+
+    /**
+     * @brief Convolution by matrix multiplication.
+     * 
+     * @param kernel Convolution kernel.
+     * @param padding 0: valid mode; 1: same mode
+     * @param stride Stride.
+     * @return Matrix<T> Convolution result.
+     */
+    Matrix<T> convolution_matrix_multiply(Matrix<T>& kernel, bool padding, int stride);
+
+    /**
      * @brief Max pooling.
      * 
      * @param pool_size Size of pooling kernel;
@@ -633,6 +661,7 @@ class Matrix {
 
 // ----------------------------------------------------------------------------------------------------------------------
 
+using std::cerr;
 using std::cin;
 using std::cout;
 using std::endl;
@@ -667,6 +696,18 @@ inline void Matrix<T>::print_shape() {
 template <typename T>
 inline bool Matrix<T>::shape_equals(Matrix<T>& other) {
     return this->nrows == other.nrows && this->ncols == other.ncols;
+}
+
+template <typename T>
+inline void Matrix<T>::reshape(int nrows, int ncols) {
+    if (this->parent_matrix != nullptr) {
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+             << "Reshape error: cannot reshape a submatrix." << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    this->nrows = nrows;
+    this->ncols = ncols;
 }
 
 // ---------------------------------------------------------------------------------
@@ -794,7 +835,7 @@ Matrix<T> Matrix<T>::create_col_vec(int nrows, T fill) {
 template <typename T>
 Matrix<T> Matrix<T>::create_diagonal(int nrows, T fill) {
     if (nrows < 1) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Diagonal matrix error: rows is less than 1" << endl;
     }
     Matrix<T> res = Matrix(nrows, nrows);
@@ -825,7 +866,7 @@ template <typename T>
 Matrix<T> Matrix<T>::read_matrix(const char* file_name) {
     ifstream in(file_name);
     if (!in.is_open()) {
-        cout << "Error opening file." << endl;
+        cerr << "Error opening file." << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -893,7 +934,7 @@ void Matrix<T>::print() {
 template <typename T>
 inline T* Matrix<T>::operator[](int i) {
     if (i > this->nrows - 1) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Index error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
@@ -907,7 +948,7 @@ inline T* Matrix<T>::operator[](int i) {
 template <typename T>
 inline T& Matrix<T>::operator()(int i, int j) {
     if (i > this->nrows - 1 || j > this->ncols - 1) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Index error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
@@ -952,7 +993,7 @@ inline bool Matrix<T>::operator!=(Matrix<T>& other) {
 template <typename T>
 inline Matrix<T> Matrix<T>::operator+(Matrix<T>& other) {
     if (!this->shape_equals(other)) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Addition error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
@@ -984,7 +1025,7 @@ inline Matrix<T> Matrix<T>::operator+(T t) {
 template <typename T>
 inline Matrix<T> Matrix<T>::operator-(Matrix<T>& other) {
     if (!this->shape_equals(other)) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Subtraction error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1037,13 +1078,13 @@ Matrix<U> operator*(int coef, Matrix<U>& m) {
 template <typename T>
 Matrix<T> Matrix<T>::operator^(int expo) {
     if (this->nrows != this->ncols) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Power error: matrix is not square." << endl;
         exit(EXIT_FAILURE);
     }
 
     if (expo < 1) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Power error: exponent is less than 1." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1082,7 +1123,7 @@ Matrix<T>& Matrix<T>::operator*=(T coef) {
 template <typename T>
 Matrix<T>& Matrix<T>::operator+=(Matrix<T>& other) {
     if (!this->shape_equals(other)) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Addition error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1110,7 +1151,7 @@ inline Matrix<T>& Matrix<T>::operator+=(T t) {
 template <typename T>
 Matrix<T>& Matrix<T>::operator-=(Matrix<T>& other) {
     if (!this->shape_equals(other)) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Addition error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1127,7 +1168,7 @@ Matrix<T>& Matrix<T>::operator-=(Matrix<T>& other) {
 template <typename T>
 Matrix<T> Matrix<T>::multiply_elements(Matrix<T>& other) {
     if (!this->shape_equals(other)) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Multiplication error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1190,22 +1231,27 @@ Matrix<T> Matrix<T>::pad(int length) {
 
 template <typename T>
 Matrix<T> Matrix<T>::convolution(Matrix<T>& kernel, bool padding, int stride) {
+    return this->convolution_matrix_multiply(kernel, padding, stride);
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::convolution_multiply_element(Matrix<T>& kernel, bool padding, int stride) {
     // if (this->nrows != this->ncols) {
-    //     cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+    //     cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
     //          << "Convolution error: this is not a square matrix." << endl;
     //     exit(EXIT_FAILURE);
     // }
 
-    if (not padding) {
+    if (!padding) {
         if (kernel.nrows > this->nrows || kernel.ncols > this->ncols) {
-            cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+            cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
                  << "Convolution error: kernel is larger than input matrix when padding=0." << endl;
             exit(EXIT_FAILURE);
         }
     }
 
     if (kernel.nrows != kernel.ncols) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Convolution error: kernel is not a square matrix." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1217,19 +1263,17 @@ Matrix<T> Matrix<T>::convolution(Matrix<T>& kernel, bool padding, int stride) {
     if (padding) {
         // pad_length = (kernel_size - 1) / 2
         if (kernel_size % 2 == 0) {
-            cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+            cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
                  << "Convolution error: padding requires odd size kernel." << endl;
             exit(EXIT_FAILURE);
         }
 
         Matrix<T> pad_matrix = this->pad((kernel_size - 1) / 2);
 
-        int pad_matrix_size = pad_matrix.nrows;
-
         int res_i = 0;
-        for (int i = 0; i <= pad_matrix_size - kernel_size; i += stride) {
+        for (int i = 0; i <= pad_matrix.nrows - kernel_size; i += stride) {
             int res_j = 0;
-            for (int j = 0; j <= pad_matrix_size - kernel_size; j += stride) {
+            for (int j = 0; j <= pad_matrix.ncols - kernel_size; j += stride) {
                 res[res_i][res_j] = pad_matrix.submatrix_ROI(i, i + kernel_size, j, j + kernel_size).multiply_elements(kernel).sum();
                 res_j++;
             }
@@ -1251,9 +1295,81 @@ Matrix<T> Matrix<T>::convolution(Matrix<T>& kernel, bool padding, int stride) {
 }
 
 template <typename T>
+Matrix<T> Matrix<T>::convolution_matrix_multiply(Matrix<T>& kernel, bool padding, int stride) {
+    // if (this->nrows != this->ncols) {
+    //     cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+    //          << "Convolution error: this is not a square matrix." << endl;
+    //     exit(EXIT_FAILURE);
+    // }
+
+    if (!padding) {
+        if (kernel.nrows > this->nrows || kernel.ncols > this->ncols) {
+            cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+                 << "Convolution error: kernel is larger than input matrix when padding=0." << endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if (kernel.nrows != kernel.ncols) {
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+             << "Convolution error: kernel is not a square matrix." << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    int kernel_size = kernel.nrows;
+
+    int res_rows = (this->nrows + 2 * padding - kernel_size) / stride + 1;
+    int res_cols = (this->ncols + 2 * padding - kernel_size) / stride + 1;
+    Matrix<T> converted_matrix(res_rows * res_cols, kernel_size * kernel_size);
+
+    float* pdata = converted_matrix.data;
+
+    if (padding) {
+        // pad_length = (kernel_size - 1) / 2
+        if (kernel_size % 2 == 0) {
+            cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+                 << "Convolution error: padding requires odd size kernel." << endl;
+            exit(EXIT_FAILURE);
+        }
+
+        Matrix<T> pad_matrix = this->pad((kernel_size - 1) / 2);
+
+        for (int i = 0; i <= pad_matrix.nrows - kernel_size; i += stride) {
+            for (int j = 0; j <= pad_matrix.ncols - kernel_size; j += stride) {
+                Matrix<T> submat = pad_matrix.submatrix_ROI(i, i + kernel_size, j, j + kernel_size);
+                for (int i2 = 0; i2 < submat.nrows; i2++) {
+                    for (int j2 = 0; j2 < submat.ncols; j2++) {
+                        *pdata = submat[i2][j2];
+                        pdata++;
+                    }
+                }
+            }
+        }
+    } else {
+        for (int i = 0; i <= this->nrows - kernel_size; i += stride) {
+            for (int j = 0; j <= this->ncols - kernel_size; j += stride) {
+                Matrix<T> submat = this->submatrix_ROI(i, i + kernel_size, j, j + kernel_size);
+                for (int i2 = 0; i2 < submat.nrows; i2++) {
+                    for (int j2 = 0; j2 < submat.ncols; j2++) {
+                        *pdata = submat[i2][j2];
+                        pdata++;
+                    }
+                }
+            }
+        }
+    }
+
+    kernel.reshape(kernel_size * kernel_size, 1);
+    Matrix<T> res = converted_matrix * kernel;
+    res.reshape(res_rows, res_cols);
+
+    return res;
+}
+
+template <typename T>
 Matrix<T> Matrix<T>::max_pooling(int pool_size, int stride) {
     if (pool_size > this->nrows || pool_size > this->ncols) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Max pooling error: kernel is larger than input matrix." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1304,7 +1420,7 @@ Matrix<T> Matrix<T>::flatten() {
 template <typename T>
 Matrix<T> Matrix<T>::multiply_matrix(Matrix<T>& m1, Matrix<T>& m2) {
     if (m1.ncols != m2.nrows) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Multiplication error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1323,7 +1439,7 @@ Matrix<T> Matrix<T>::multiply_matrix(Matrix<T>& m1, Matrix<T>& m2) {
 template <typename T>
 Matrix<T> Matrix<T>::strassen(Matrix<T>& A, Matrix<T>& B) {
     if (!A.shape_equals(B)) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Strassen multiplication error: matrix dimension cannot match." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1331,7 +1447,7 @@ Matrix<T> Matrix<T>::strassen(Matrix<T>& A, Matrix<T>& B) {
     int N = A.nrows;
 
     if ((N & (N - 1)) != 0) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Strassen multiplication error: matrix dimension is not 2^n." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1416,7 +1532,7 @@ Matrix<T> Matrix<T>::submatrix_cpy(int row_start, int row_end, int col_start, in
 template <typename T>
 Matrix<T> Matrix<T>::submatrix(int row_start, int row_end, int col_start, int col_end) {
     if (row_start < 0 || row_end > this->nrows || col_start < 0 || col_end > this->ncols) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "Submatrix error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
@@ -1427,13 +1543,13 @@ Matrix<T> Matrix<T>::submatrix(int row_start, int row_end, int col_start, int co
 template <typename T>
 void Matrix<T>::adjust_ROI(int row_start, int row_end, int col_start, int col_end) {
     if (this->parent_matrix == nullptr) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "ROI adjustment error: not a submatrix." << endl;
         exit(EXIT_FAILURE);
     }
 
     if (row_start < 0 || row_end > this->parent_matrix->nrows || col_start < 0 || col_end > this->parent_matrix->ncols) {
-        cout << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
+        cerr << __FILE__ << ": " << __FUNCTION__ << " at line " << __LINE__ << ": "
              << "ROI adjustment error: array index out of bound." << endl;
         exit(EXIT_FAILURE);
     }
