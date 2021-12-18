@@ -46,7 +46,7 @@ class Layer {
 };
 
 class ConvBNLayer : public Layer {
-   public:
+   private:
     bool padding;
     int stride;
     int kernel_size;
@@ -73,7 +73,7 @@ class ReLULayer : public Layer {
 };
 
 class MaxPoolingLayer : public Layer {
-   public:
+   private:
     int pool_size;
     int stride;
 
@@ -87,7 +87,7 @@ class MaxPoolingLayer : public Layer {
 };
 
 class FCLayer : public Layer {
-   public:
+   private:
     int in_features;
     int out_features;
     M2D weight_m2d;
@@ -111,9 +111,10 @@ class SoftmaxLayer : public Layer {
 };
 
 class CNN {
-   public:
+   private:
     vector<Layer*> layers;
 
+   public:
     void add_layer(Layer* l);
 
     M2D load_image(const char* image_path, int image_size);
@@ -328,7 +329,7 @@ M2D CNN::load_image(const char* image_path, int image_size) {
         exit(EXIT_FAILURE);
     }
 
-    if (cv_image.rows!=image_size || cv_image.cols!=image_size) {
+    if (cv_image.rows != image_size || cv_image.cols != image_size) {
         cv::resize(cv_image, cv_image, cv::Size(image_size, image_size));
     }
 

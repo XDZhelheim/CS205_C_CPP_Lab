@@ -1258,7 +1258,7 @@ Matrix<T> Matrix<T>::convolution_multiply_element(Matrix<T>& kernel, bool paddin
 
     int kernel_size = kernel.nrows;
 
-    Matrix<T> res((this->nrows + 2 * padding - kernel_size) / stride + 1, (this->ncols + 2 * padding - kernel_size) / stride + 1, (T)0);
+    Matrix<T> res((this->nrows + 2 * padding - kernel_size) / stride + 1, (this->ncols + 2 * padding - kernel_size) / stride + 1);
 
     if (padding) {
         // pad_length = (kernel_size - 1) / 2
@@ -1374,7 +1374,7 @@ Matrix<T> Matrix<T>::max_pooling(int pool_size, int stride) {
         exit(EXIT_FAILURE);
     }
 
-    Matrix<T> res((this->nrows - pool_size) / stride + 1, (this->ncols - pool_size) / stride + 1, (T)0);
+    Matrix<T> res((this->nrows - pool_size) / stride + 1, (this->ncols - pool_size) / stride + 1);
 
     int res_i = 0;
     for (int i = 0; i <= this->nrows - pool_size; i += stride) {
