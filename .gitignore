@@ -54,3 +54,4 @@ Doxyfile
 build/
 
 data/
+__pycache__/

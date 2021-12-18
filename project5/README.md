@@ -26,23 +26,14 @@ My program gave a general implementation of CNN forwarding, with every part modu
 
 ### 1.2 Development Environment
 
-* x86_64
+* Windows 10 Home China x86_64
 
-  * Windows 10 Home China x86_64
+* Kernel version `10.0.19042`
+* `Intel i5-9300H (8) @ 2.400GHz`
 
-  * Kernel version `10.0.19042`
-  * `Intel i5-9300H (8) @ 2.400GHz`
+* `g++.exe (tdm64-1) 10.3.0`
 
-  * `g++.exe (tdm64-1) 10.3.0`
-
-  * C++ standard: `c++11`
-* Arm64
-
-  * `macOS 12.0.1 21A559 arm64`
-  * Darwin Kernel Version `21.1.0`
-  * Apple M1 Pro (10-cores)
-  * `Apple clang version 13.0.0 (clang-1300.0.29.3)`
-  * C++ standard: `c++11`
+* C++ standard: `c++11`
 
 ## 2 Design and Implementation
 
@@ -108,6 +99,8 @@ typedef Matrix<Matrix<float>> M2D;
 
 ![](./images/2-4.svg)
 
+Each extended layer implemented `forward()` function, which is an interface for forwarding procedure.
+
 And for CNN class, I designed an interface to put these layers together:
 
 ```c++
@@ -141,6 +134,8 @@ cnn.add_layer(new FCLayer(fc_params[0]));
 cnn.add_layer(new SoftmaxLayer());
 ```
 
+The parameters are provided by https://github.com/ShiqiYu/SimpleCNNbyCPP.
+
 Therefore, it is free to change the structure of the CNN as you wish.
 
 By calling `predict`, the input image will start operations on each layer.
@@ -155,11 +150,52 @@ M2D CNN::predict(const char* image_path, int image_size) {
 }
 ```
 
-For image reading, use `cv::imread` and extract the data. Note that the array after reading image is `[b0, g0, r0, b1, g1, r1, ...]` and should be changed to `[r0, r1, r2, ..., g0, g1, g2,...  b0, b1, b2, ...]`, which cost a lot of my time to debug.
+For image reading, use `cv::imread` and extract the data. Note that the array after reading image is `[b0, g0, r0, b1, g1, r1, ...]` and should be changed to `[r0, r1, r2, ..., g0, g1, g2,...  b0, b1, b2, ...]`, which cost a lot of my time to debug. After that, use `cv::resize` to resize the image as `(128, 128)`. Thus, the program can support different image size.
 
 ---
 
 ## 3 Empirical Verification
 
+### 3.1 Test Platform
 
+x86_64:
 
+![](./images/intelneofetch.png)
+
+ARM64:
+
+![](./images/armneofetch.png)
+
+### 3.2 Dataset & Test Result
+
+The dataset I used for test is [LFW(Labeled Faces in the Wild)](http://vis-www.cs.umass.edu/lfw/), a very basic test dataset in face recognition area.
+
+Result:
+
+| Total | Correct (Intel) | Accuracy (Intel) | Time (Intel) |
+| :---: | :-------------: | :--------------: | :----------: |
+| 13233 |      13192      |      99.69%      |   1296.89s   |
+
+| Total | Correct (ARM) | Accuracy (ARM) | Time (ARM) |
+| :---: | :-----------: | :------------: | :--------: |
+| 13233 |     13192     |     99.69%     |  1179.46s  |
+
+As shown above, the dataset contains 13233 face images in total, and my program recognized 13192 of them(the threshold is 0.5), which achieved 99.69% accuracy. And to my surprise, my program runs faster on our lab's ARM server, although it has a worse CPU.
+
+Therefore, the program has a good accuracy performance on LFW dataset, which proved the correctness of my CNN structure.
+
+And there is another thing I must mention, is `demo.py` wrong? (Tested on Intel.)
+
+| Total | Correct (demo.py) | Accuracy (demo.py) | Time (demo.py) |
+| :---: | :---------------: | :----------------: | :------------: |
+| 13233 |       9913        |       74.91%       |     75.93s     |
+
+## 4 Conclusion
+
+In this project, I implemented a CNN forwarding procedure by C++. Frankly, I never dived such deep in the basic principles of neural network. Through this project I got a better understanding on neural networks, especially convolution, and how data flowed through each layer.
+
+**Future Improvement:**
+
+* Improve padding
+* Vectorization
+* Change layers to template classes to support different data type
