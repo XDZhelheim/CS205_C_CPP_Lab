@@ -4,6 +4,8 @@
 
 ---
 
+[TOC]
+
 ## 1 Introduction
 
 Since it is the last project of this semester, I finally made my git repo public at:
@@ -27,13 +29,11 @@ My program gave a general implementation of CNN forwarding, with every part modu
 ### 1.2 Development Environment
 
 * Windows 10 Home China x86_64
-
 * Kernel version `10.0.19042`
 * `Intel i5-9300H (8) @ 2.400GHz`
-
 * `g++.exe (tdm64-1) 10.3.0`
-
 * C++ standard: `c++11`
+* OpenCV 4.5.4
 
 ## 2 Design and Implementation
 
@@ -190,6 +190,8 @@ And there is another thing I must mention, is `demo.py` wrong? (Tested on Intel.
 | :---: | :---------------: | :----------------: | :------------: |
 | 13233 |       9913        |       74.91%       |     75.93s     |
 
+I have opened a PR at https://github.com/ShiqiYu/SimpleCNNbyCPP/pull/4.
+
 ## 4 Conclusion
 
 In this project, I implemented a CNN forwarding procedure by C++. Frankly, I never dived such deep in the basic principles of neural network. Through this project I got a better understanding on neural networks, especially convolution, and how data flowed through each layer.
@@ -199,3 +201,4 @@ In this project, I implemented a CNN forwarding procedure by C++. Frankly, I nev
 * Improve padding
 * Vectorization
 * Change layers to template classes to support different data type
+* Modify ReLU and SoftMax layer to singleton pattern
