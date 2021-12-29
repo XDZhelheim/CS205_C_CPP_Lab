@@ -8,6 +8,8 @@
 
 ## 1 Introduction
 
+**This is outdated, see project 5 for the lastest version of `matrix` class.**
+
 ### 1.1 Project Description
 
 This project aims to implement a program to multiply two matrices in two files.
