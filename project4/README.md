@@ -10,6 +10,8 @@
 
 ## 1 Introduction
 
+**This is outdated, see project 5 for the lastest version of `matrix` class.**
+
 The documentation of class `matrix` is hosted on [my GitHub](https://xdzhelheim.github.io/CS205_C_CPP_Lab/classmatrix.html).
 
 ![](./images/doc.png)
